@@ -1,0 +1,27 @@
+syntax = "proto3";
+option java_package = "org.rivierarobotics.protos";
+option java_multiple_files = true;
+
+message Game {
+	string name = 1;
+	repeated FieldDefinition fieldDefs = 2;
+}
+
+message FieldDefinition {
+	Type type = 1;
+	string name = 2;
+	/**
+	 * Optional field
+	 */
+	oneof unitOneOf {
+		bool notHasUnit = 3;
+		string unit = 4;
+	}
+	enum Type {
+		INTEGER = 0;
+		FLOATING = 1;
+		BOOLEAN = 2;
+		STRING = 3;
+		CHOICE = 4;
+	}
+}

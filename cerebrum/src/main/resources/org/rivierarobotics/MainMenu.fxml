@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+
+<MenuBar xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <menus>
+      <Menu mnemonicParsing="false" text="Games">
+        <items>
+          <MenuItem fx:id="createGame" mnemonicParsing="false" text="Create Game" />
+            <MenuItem fx:id="editGame" mnemonicParsing="false" text="Edit Game..." />
+            <MenuItem fx:id="openGame" mnemonicParsing="false" text="Open Game..." />
+            <Menu fx:id="openRecentGame" mnemonicParsing="false" text="Open Recent Game" />
+        </items>
+      </Menu>
+   </menus>
+</MenuBar>

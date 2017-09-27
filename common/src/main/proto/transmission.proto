@@ -1,0 +1,13 @@
+syntax = "proto3";
+option java_package = "org.rivierarobotics.protos";
+option java_multiple_files = true;
+
+import "matchDef.proto";
+
+message TransmitFrame {
+	oneof kind {
+		TeamMatch match = 1;
+		bool start = 2;
+		bool end = 3;
+	}
+}
