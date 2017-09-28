@@ -3,6 +3,7 @@ package org.rivierarobotics.sharpeyes.controller;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.rivierarobotics.protos.FieldDefinition;
@@ -49,7 +50,7 @@ public class FieldController {
 
         typeChoice.getItems().addAll(VALID_TYPES);
         typeChoice.setConverter(new TitleCaseEnumConverter<>(FieldDefinition.Type.class));
-        
+
         weight.textProperty().addListener(obs -> {
             if (!weight.getText().isEmpty() && !validWeight(weight.getText())) {
                 weight.getStyleClass().add("invalid");
@@ -71,11 +72,12 @@ public class FieldController {
     public BooleanExpression fieldValidValue() {
         return fieldValid;
     }
-    
+
     public void setFieldDef(FieldDefinition def) {
         typeChoice.setValue(def.getType());
         name.setText(def.getName());
         unit.setText(def.getUnit());
+        weight.setText(String.valueOf(def.getWeight()));
     }
 
     public FieldDefinition getFieldDef() {
@@ -88,6 +90,11 @@ public class FieldController {
         } else {
             def.setNotHasUnit(true);
         }
+        int weight = Optional.of(this.weight.textProperty().getValueSafe())
+                .filter(s -> !s.isEmpty())
+                .map(Integer::valueOf)
+                .orElse(0);
+        def.setWeight(weight);
         return def.build();
     }
 
