@@ -7,10 +7,13 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.sharpeyes.Loader;
 import org.rivierarobotics.sharpeyes.SharpEyes;
+import org.rivierarobotics.sharpeyes.config.ConfigManager;
+import org.rivierarobotics.sharpeyes.config.RecentlyOpened;
 import org.rivierarobotics.sharpeyes.controller.CreateGameController.CGCCloseEvent;
 import org.rivierarobotics.sharpeyes.data.file.FileDataProvider;
 import org.rivierarobotics.sharpeyes.event.AddTabEvent;
@@ -19,8 +22,6 @@ import org.rivierarobotics.sharpeyes.event.RemoveTabEvent;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import javafx.beans.Observable;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -33,11 +34,9 @@ import javafx.stage.Window;
 public class MenuController {
 
     public final EventBus bus = new EventBus("MenuController");
-    private final ObservableList<Path> recentlyOpened;
     private final Window parentWindow;
 
-    public MenuController(ObservableList<Path> recentlyOpened, Window parentWindow) {
-        this.recentlyOpened = recentlyOpened;
+    public MenuController(Window parentWindow) {
         this.parentWindow = parentWindow;
     }
 
@@ -51,16 +50,23 @@ public class MenuController {
     private MenuItem createGame;
 
     public void initialize() {
-        recentlyOpened.addListener((Observable obs) -> rewriteRecentGames());
+        RecentlyOpened.getBus().register(this);
+        rewriteRecentGames();
 
         openGame.setOnAction(this::openGameHandler);
         createGame.setOnAction(this::createGameHandler);
         editGame.setOnAction(this::editGameHandler);
     }
 
+    @Subscribe
+    public void onRecentAdded(RecentlyOpened.Event event) {
+        rewriteRecentGames();
+    }
+
     private void rewriteRecentGames() {
         openRecentGame.getItems().clear();
-        recentlyOpened.forEach(p -> {
+        ConfigManager.loadIfNeeded().getRecentlyOpenedList().forEach(path -> {
+            Path p = Paths.get(path);
             MenuItem newItem = new MenuItem(p.getFileName().toString());
             newItem.setOnAction(openRecentGameHandler(p));
             openRecentGame.getItems().add(newItem);
@@ -103,6 +109,7 @@ public class MenuController {
     }
 
     private void doEditGame(Path path) {
+        RecentlyOpened.pushPath(path);
         Game game = getGame(path);
         CreateGameController controller = new CreateGameController(parentWindow, game, path);
         Node node = Loader.loadFxml("CreateGame", controller);
@@ -123,6 +130,7 @@ public class MenuController {
     }
 
     private void doOpenGame(Path path) {
+        RecentlyOpened.pushPath(path);
         Game game = getGame(path);
         AnalyzeGameController controller = new AnalyzeGameController(new FileDataProvider(parentWindow), game);
         Node node = Loader.loadFxml("AnalyzeGame", controller);

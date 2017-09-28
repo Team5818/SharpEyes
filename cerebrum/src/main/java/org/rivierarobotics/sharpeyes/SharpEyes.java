@@ -1,6 +1,5 @@
 package org.rivierarobotics.sharpeyes;
 
-import java.nio.file.Path;
 import java.util.Iterator;
 
 import org.rivierarobotics.sharpeyes.controller.MenuController;
@@ -10,7 +9,6 @@ import org.rivierarobotics.sharpeyes.event.RemoveTabEvent;
 import com.google.common.eventbus.Subscribe;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
@@ -66,8 +64,7 @@ public class SharpEyes extends Application {
     }
 
     private MenuBar setupMenus(Stage primaryStage) {
-        ObservableList<Path> recents = FXCollections.emptyObservableList();
-        MenuController controller = new MenuController(recents, primaryStage);
+        MenuController controller = new MenuController(primaryStage);
         controller.bus.register(this);
         MenuBar bar = Loader.loadFxml("MainMenu", controller);
         bar.setUseSystemMenuBar(true);

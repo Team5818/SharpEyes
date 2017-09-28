@@ -39,13 +39,12 @@ repositories {
     }
 }
 
-ext.protobufVersion = '3.4.0'
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.10'
-    compile group: 'com.google.protobuf', name: 'protobuf-java', version: project.protobufVersion
+    compile group: 'com.google.protobuf', name: 'protobuf-java', version: rootProject.protobufVersion
 
     addAPTReqWComp group: 'com.google.guava', name: 'guava', version: '23.0'
     addAPT group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc3'
@@ -67,7 +66,7 @@ dependencies {
 
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:' + project.protobufVersion
+        artifact = 'com.google.protobuf:protoc:' + rootProject.protobufVersion
     }
 }
 

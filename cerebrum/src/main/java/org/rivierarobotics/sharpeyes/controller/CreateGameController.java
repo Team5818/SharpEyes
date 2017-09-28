@@ -12,6 +12,7 @@ import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.sharpeyes.FXUtil;
 import org.rivierarobotics.sharpeyes.Loader;
 import org.rivierarobotics.sharpeyes.SharpEyes;
+import org.rivierarobotics.sharpeyes.config.RecentlyOpened;
 import org.rivierarobotics.sharpeyes.event.DeleteFieldEvent;
 
 import com.google.auto.value.AutoValue;
@@ -186,6 +187,7 @@ public class CreateGameController {
             throw new UncheckedIOException(e);
         }
         originalPath = p;
+        RecentlyOpened.pushPath(originalPath);
         bus.post(CGCCloseEvent.create(this));
     }
 
