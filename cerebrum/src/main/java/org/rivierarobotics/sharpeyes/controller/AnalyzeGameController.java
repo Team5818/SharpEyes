@@ -2,14 +2,19 @@ package org.rivierarobotics.sharpeyes.controller;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import org.rivierarobotics.protos.FieldDefinition;
 import org.rivierarobotics.protos.FieldValue;
 import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.data.DataProvider;
+
+import com.google.common.collect.ComparisonChain;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -102,16 +107,16 @@ public class AnalyzeGameController {
         };
     }
 
-    private static Object extractFieldValue(FieldValue val) {
+    private static <T> T extractFieldValue(FieldValue val, Function<Object, T> converter) {
         switch (val.getValueCase()) {
             case BOOLE:
-                return val.getBoole();
+                return converter.apply(val.getBoole());
             case FLOATING:
-                return val.getFloating();
+                return converter.apply(val.getFloating());
             case INTEGER:
-                return val.getInteger();
+                return converter.apply(val.getInteger());
             case STR:
-                return val.getStr();
+                return converter.apply(val.getStr());
             default:
                 throw new AssertionError("Unhandled case " + val.getValueCase());
         }
@@ -123,7 +128,39 @@ public class AnalyzeGameController {
         col.setCellFactory(tc -> {
             return new AGCTableCell();
         });
+        col.setComparator(getComparator(name));
         dataTable.getColumns().add(col);
+    }
+
+    private Comparator<FieldValue> getComparator(String name) {
+        Optional<FieldDefinition> def = findFieldDef(name);
+        if (!def.isPresent()) {
+            // should never happen -- just use a garbage comparator
+            return Comparator.comparing(FieldValue::toString);
+        }
+        return new Comparator<FieldValue>() {
+
+            @Override
+            public int compare(FieldValue o1, FieldValue o2) {
+                return ComparisonChain.start()
+                        .compare((Comparable<?>) extractFieldValue(o1, Function.identity()), (Comparable<?>) extractFieldValue(o2, Function.identity()))
+                        .result();
+            }
+        };
+    }
+
+    private Optional<FieldDefinition> findFieldDef(String name) {
+        return game.getFieldDefsList().stream().filter(def -> name.equals(def.getName())).findFirst();
+    }
+
+    private static boolean isNumber(FieldValue value) {
+        switch (value.getValueCase()) {
+            case FLOATING:
+            case INTEGER:
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static final class AGCTableCell extends TableCell<TeamMatch, FieldValue> {
@@ -139,15 +176,12 @@ public class AnalyzeGameController {
                 super.setText(null);
                 super.setGraphic(null);
             } else {
-                switch (item.getValueCase()) {
-                    case FLOATING:
-                    case INTEGER:
-                        setAlignment(Pos.TOP_RIGHT);
-                        break;
-                    default:
-                        setAlignment(Pos.TOP_LEFT);
+                if (isNumber(item)) {
+                    setAlignment(Pos.TOP_RIGHT);
+                } else {
+                    setAlignment(Pos.TOP_LEFT);
                 }
-                super.setText(String.valueOf(extractFieldValue(item)));
+                super.setText(extractFieldValue(item, String::valueOf));
                 super.setGraphic(null);
             }
         }
