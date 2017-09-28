@@ -10,6 +10,7 @@
       <ChoiceBox fx:id="typeChoice" prefWidth="150.0" />
       <TextField fx:id="name" promptText="Name" />
       <TextField fx:id="unit" promptText="Unit (optional)" />
+      <TextField fx:id="weight" alignment="CENTER_RIGHT" prefColumnCount="5" promptText="Weight" />
    </children>
    <opaqueInsets>
       <Insets />

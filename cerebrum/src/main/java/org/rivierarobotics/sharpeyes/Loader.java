@@ -10,9 +10,11 @@ import javafx.scene.image.Image;
 
 public class Loader {
 
+    public static final String PKG_PREFIX = "org/rivierarobotics/";
+
     public static <T> T loadFxml(String resource, Object controller) {
         try {
-            String normalizedName = "org/rivierarobotics/" + resource + ".fxml";
+            String normalizedName = PKG_PREFIX + resource + ".fxml";
             FXMLLoader loader = new FXMLLoader(Resources.getResource(normalizedName));
             loader.setController(controller);
             return loader.load();
@@ -22,7 +24,7 @@ public class Loader {
     }
 
     public static Image loadImage(String resource) {
-        String normalizedName = "org/rivierarobotics/" + resource + ".png";
+        String normalizedName = PKG_PREFIX + resource + ".png";
         return new Image(Resources.getResource(normalizedName).toString());
     }
 

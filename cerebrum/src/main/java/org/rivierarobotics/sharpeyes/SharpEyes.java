@@ -1,12 +1,15 @@
 package org.rivierarobotics.sharpeyes;
 
+import java.net.URL;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.rivierarobotics.sharpeyes.controller.MenuController;
 import org.rivierarobotics.sharpeyes.event.AddTabEvent;
 import org.rivierarobotics.sharpeyes.event.RemoveTabEvent;
 
 import com.google.common.eventbus.Subscribe;
+import com.google.common.io.Resources;
 
 import javafx.application.Application;
 import javafx.collections.ObservableList;
@@ -53,8 +56,18 @@ public class SharpEyes extends Application {
         VBox.setVgrow(container, Priority.ALWAYS);
 
         primaryStage.setScene(new Scene(top, 800, 600));
+        addStyleSheets();
         primaryStage.setMaximized(true);
         primaryStage.show();
+    }
+
+    private void addStyleSheets() {
+        Stream.of("CGField")
+                .map(s -> s + ".css")
+                .map(Loader.PKG_PREFIX::concat)
+                .map(Resources::getResource)
+                .map(URL::toString)
+                .forEach(stage.getScene().getStylesheets()::add);
     }
 
     private Tab fakeTab() {

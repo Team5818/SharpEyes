@@ -24,4 +24,5 @@ message FieldDefinition {
 		STRING = 3;
 		CHOICE = 4;
 	}
+	uint32 weight = 5;
 }

@@ -39,6 +39,8 @@ public class FieldController {
     private TextField name;
     @FXML
     private TextField unit;
+    @FXML
+    private TextField weight;
 
     public void initialize() {
         BooleanExpression emptyName = MoreBindings.isTextBlank(name.textProperty());
@@ -47,6 +49,23 @@ public class FieldController {
 
         typeChoice.getItems().addAll(VALID_TYPES);
         typeChoice.setConverter(new TitleCaseEnumConverter<>(FieldDefinition.Type.class));
+        
+        weight.textProperty().addListener(obs -> {
+            if (!weight.getText().isEmpty() && !validWeight(weight.getText())) {
+                weight.getStyleClass().add("invalid");
+            } else {
+                weight.getStyleClass().remove("invalid");
+            }
+        });
+    }
+
+    private boolean validWeight(String text) {
+        // invalid if 0 + digits
+        if (text.length() > 1 && text.codePointAt(0) == '0') {
+            return false;
+        }
+        // valid if all digits
+        return text.codePoints().allMatch(cp -> '0' <= cp && cp <= '9');
     }
 
     public BooleanExpression fieldValidValue() {
