@@ -77,7 +77,6 @@ public class SharpEyes extends Application {
     @Subscribe
     public void addTab(AddTabEvent event) {
         Tab tab = new Tab(event.getTabName(), event.getTabContents());
-        tab.setClosable(false);
         ObservableList<Tab> tabs = primaryPane.getTabs();
         // insert it before the hidden fake-tab
         tabs.add(tabs.size() - 1, tab);
