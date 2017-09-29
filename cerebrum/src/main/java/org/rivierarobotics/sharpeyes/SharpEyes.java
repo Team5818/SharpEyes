@@ -18,6 +18,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -48,6 +49,7 @@ public class SharpEyes extends Application {
         primaryPane = new TabPane();
         // add a fake tab to get the header to always show up
         primaryPane.getTabs().add(fakeTab());
+        primaryPane.setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
 
         ScrollPane container = new ScrollPane(primaryPane);
         container.setFitToHeight(true);

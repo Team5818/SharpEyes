@@ -16,6 +16,7 @@ import org.rivierarobotics.sharpeyes.common.FieldDefHelper;
 import org.rivierarobotics.sharpeyes.data.DataProvider;
 
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Iterables;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -28,6 +29,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableColumn.SortType;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.util.Callback;
@@ -78,6 +80,8 @@ public class AnalyzeGameController {
             return;
         }
         dataTable.getItems().setAll(matches);
+        // re-sort
+        dataTable.sort();
     }
 
     private void setupTable() {
@@ -99,6 +103,11 @@ public class AnalyzeGameController {
         }
 
         addColumn("Weight", fvMaker((m, fv) -> fv.setInteger(computeWeight(m))));
+
+        // sort weight by default
+        TableColumn<TeamMatch, ?> weightCol = Iterables.getLast(dataTable.getColumns());
+        dataTable.getSortOrder().add(0, weightCol);
+        weightCol.setSortType(SortType.DESCENDING);
     }
 
     private long computeWeight(TeamMatch m) {
@@ -170,7 +179,18 @@ public class AnalyzeGameController {
         };
     }
 
+    private static final FieldDefinition FDEF_WEIGHT = FieldDefinition.newBuilder()
+            .setType(FieldDefinition.Type.INTEGER)
+            .setNotHasUnit(true)
+            .setName("Weight")
+            .build();
+
     private Optional<FieldDefinition> findFieldDef(String name) {
+        switch (name) {
+            case "Weight":
+                return Optional.of(FDEF_WEIGHT);
+            default:
+        }
         return game.getFieldDefsList().stream().filter(def -> name.equals(def.getName())).findFirst();
     }
 

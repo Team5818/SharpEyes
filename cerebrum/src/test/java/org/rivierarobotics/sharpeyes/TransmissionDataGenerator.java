@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Function;
@@ -55,20 +56,25 @@ public class TransmissionDataGenerator {
                 .setMatchNumber(matchNumber);
 
         game.getFieldDefsList().forEach(field -> {
-            matchBuilder.putValues(field.getName(), getValueForType(field.getType()));
+            matchBuilder.putValues(field.getName(), getValueForType(field));
         });
         return matchBuilder
                 .build();
     }
 
-    private static FieldValue getValueForType(FieldDefinition.Type type) {
+    private static FieldValue getValueForType(FieldDefinition def) {
         FieldValue.Builder fv = FieldValue.newBuilder();
-        switch (type) {
+        switch (def.getType()) {
             case STRING:
                 fv.setStr("string data: " + RNG.nextDouble());
                 break;
             case CHOICE:
-                fv.setStr("choice " + RNG.nextInt(5));
+                List<String> choices = def.getChoicesList();
+                if (choices.isEmpty()) {
+                    fv.setStr("");
+                    break;
+                }
+                fv.setStr(choices.get(RNG.nextInt(choices.size())));
                 break;
             case BOOLEAN:
                 fv.setBoole(RNG.nextBoolean());
@@ -77,10 +83,10 @@ public class TransmissionDataGenerator {
                 fv.setFloating(RNG.nextDouble());
                 break;
             case INTEGER:
-                fv.setInteger(RNG.nextLong());
+                fv.setInteger(RNG.nextInt(10));
                 break;
             default:
-                throw new AssertionError("missing case: " + type);
+                throw new AssertionError("missing case: " + def.getType());
         }
         return fv.build();
     }
@@ -94,7 +100,7 @@ public class TransmissionDataGenerator {
     }
 
     private static <T> T getInput(String msg, Function<String, T> converter) {
-        System.out.println(msg + ": ");
+        System.out.print(msg + ": ");
         for (;;) {
             try {
                 return converter.apply(scanner.nextLine());
