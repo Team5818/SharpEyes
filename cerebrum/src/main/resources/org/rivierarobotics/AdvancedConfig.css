@@ -1,0 +1,12 @@
+#weightTableContainer {
+}
+
+.right-border {
+	-fx-border-width: 0.0 1.0px 0.0 0.0;
+	-fx-border-color: black;
+}
+
+.left-border {
+	-fx-border-width: 0.0 0.0 0.0 1.0px;
+	-fx-border-color: black;
+}

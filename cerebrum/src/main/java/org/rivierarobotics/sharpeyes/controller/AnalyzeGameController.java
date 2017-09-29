@@ -12,6 +12,7 @@ import org.rivierarobotics.protos.FieldDefinition;
 import org.rivierarobotics.protos.FieldValue;
 import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.protos.TeamMatch;
+import org.rivierarobotics.sharpeyes.common.FieldDefHelper;
 import org.rivierarobotics.sharpeyes.data.DataProvider;
 
 import com.google.common.collect.ComparisonChain;
@@ -96,6 +97,26 @@ public class AnalyzeGameController {
                 return new SimpleObjectProperty<>(val);
             });
         }
+
+        addColumn("Weight", fvMaker((m, fv) -> fv.setInteger(computeWeight(m))));
+    }
+
+    private long computeWeight(TeamMatch m) {
+        return game.getFieldDefsList().stream()
+                .mapToLong(field -> getWeight(field, m.getValuesOrThrow(field.getName())))
+                .sum();
+    }
+
+    private long getWeight(FieldDefinition field, FieldValue value) {
+        if (field.getType() == FieldDefinition.Type.STRING) {
+            return 0;
+        }
+        if (FieldDefHelper.isMultiplierType(field.getType())) {
+            return (long) (extractFieldValue(value, x -> (Number) x).doubleValue() * field.getWeights(0));
+        }
+        String valStr = extractFieldValue(value, String::valueOf);
+        int wtIndex = FieldDefHelper.getChoices(field).indexOf(valStr);
+        return wtIndex < 0 || wtIndex >= field.getWeightsCount() ? 0 : field.getWeights(wtIndex);
     }
 
     private Callback<CellDataFeatures<TeamMatch, FieldValue>, ObservableValue<FieldValue>> fvMaker(BiConsumer<TeamMatch, FieldValue.Builder> setter) {

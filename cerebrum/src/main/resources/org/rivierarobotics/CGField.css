@@ -1,3 +1,7 @@
-.invalid {
+text-field.invalid {
 	-fx-text-box-border: #ff0000;
+}
+
+button.invalid {
+	-fx-outer-border: #ff0000;
 }

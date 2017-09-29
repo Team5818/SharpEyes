@@ -24,5 +24,9 @@ message FieldDefinition {
 		STRING = 3;
 		CHOICE = 4;
 	}
-	uint32 weight = 5;
+	repeated uint32 weights = 5;
+	/**
+	 * Only non-zero if type == Type.CHOICE
+	 */
+	repeated string choices = 6;
 }

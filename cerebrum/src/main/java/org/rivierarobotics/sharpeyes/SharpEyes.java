@@ -56,18 +56,18 @@ public class SharpEyes extends Application {
         VBox.setVgrow(container, Priority.ALWAYS);
 
         primaryStage.setScene(new Scene(top, 800, 600));
-        addStyleSheets();
+        addStyleSheets(stage.getScene());
         primaryStage.setMaximized(true);
         primaryStage.show();
     }
 
-    private void addStyleSheets() {
-        Stream.of("CGField")
+    public static void addStyleSheets(Scene scene) {
+        Stream.of("CGField", "AdvancedConfig")
                 .map(s -> s + ".css")
                 .map(Loader.PKG_PREFIX::concat)
                 .map(Resources::getResource)
                 .map(URL::toString)
-                .forEach(stage.getScene().getStylesheets()::add);
+                .forEach(scene.getStylesheets()::add);
     }
 
     private Tab fakeTab() {

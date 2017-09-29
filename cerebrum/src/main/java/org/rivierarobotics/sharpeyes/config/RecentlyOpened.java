@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Iterables;
 import com.google.common.eventbus.EventBus;
 
 public class RecentlyOpened {
@@ -30,7 +31,11 @@ public class RecentlyOpened {
     public static void pushPath(Path justOpened) {
         ConfigManager.modConfig(config -> {
             List<String> recents = new ArrayList<>(config.getRecentlyOpenedList());
-            recents.add(0, justOpened.toAbsolutePath().toString());
+            String openedAbs = justOpened.toAbsolutePath().toString();
+            if (Iterables.getFirst(recents, "").equals(openedAbs)) {
+                return;
+            }
+            recents.add(0, openedAbs);
             while (recents.size() > MAX_RECENTS) {
                 recents.remove(recents.size() - 1);
             }

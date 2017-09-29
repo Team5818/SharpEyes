@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
@@ -9,8 +10,7 @@
    <children>
       <ChoiceBox fx:id="typeChoice" prefWidth="150.0" />
       <TextField fx:id="name" promptText="Name" />
-      <TextField fx:id="unit" promptText="Unit (optional)" />
-      <TextField fx:id="weight" alignment="CENTER_RIGHT" prefColumnCount="5" promptText="Weight" />
+      <Button fx:id="advancedConfig" mnemonicParsing="false" text="Advanced Config" />
    </children>
    <opaqueInsets>
       <Insets />
