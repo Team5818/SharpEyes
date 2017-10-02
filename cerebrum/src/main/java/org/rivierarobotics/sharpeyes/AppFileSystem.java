@@ -1,7 +1,7 @@
 /*
- * This file is part of UnplannedDescent, licensed under the MIT License (MIT).
+ * This file is part of cerebrum, licensed under the MIT License (MIT).
  *
- * Copyright (c) TechShroom Studios <https://techshroom.com>
+ * Copyright (c) Team5818 <https://github.com/Team5818/SharpEyes>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
