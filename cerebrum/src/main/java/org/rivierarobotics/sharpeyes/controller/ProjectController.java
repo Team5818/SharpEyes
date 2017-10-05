@@ -4,13 +4,13 @@ import java.nio.file.Path;
 
 import org.rivierarobotics.sharpeyes.Loader;
 import org.rivierarobotics.sharpeyes.data.SourcedGame;
+import org.rivierarobotics.sharpeyes.fx.PathListCell;
 import org.rivierarobotics.sharpeyes.i18n.SharpEyesI18N;
 
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 
 public class ProjectController {
 
-    private static final class PCCell extends ListCell<Path> {
+    private static final class PCCell extends PathListCell {
 
         public PCCell(ListView<Path> parent) {
             ContextMenu menu = new ContextMenu();
@@ -32,17 +32,6 @@ public class ProjectController {
             setContextMenu(menu);
         }
 
-        @Override
-        protected void updateItem(Path item, boolean empty) {
-            super.updateItem(item, empty);
-
-            if (empty) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                setText(item.getFileName().toString());
-            }
-        }
     }
 
     private final Stage parentWindow = new Stage();

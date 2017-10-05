@@ -38,6 +38,7 @@ import com.google.common.io.Resources;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.Image;
+import javafx.scene.text.Font;
 
 public class Loader {
 
@@ -72,6 +73,11 @@ public class Loader {
             throw new UncheckedIOException(e);
         }
         return game;
+    }
+
+    public static Font loadFont(int size, String name, String ext) {
+        String normalizedName = PKG_PREFIX + "fonts/" + name + "." + ext;
+        return Font.loadFont(Resources.getResource(normalizedName).toExternalForm(), size);
     }
 
 }

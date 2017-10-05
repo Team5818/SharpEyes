@@ -18,6 +18,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Window;
 
 public final class DataProviderSelectorDialog {
@@ -57,7 +58,7 @@ public final class DataProviderSelectorDialog {
 
                 {
                     setOnMouseClicked(event -> {
-                        if (event.getClickCount() == 2) {
+                        if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
                             cellDoubleClick.run();
                         }
                     });
