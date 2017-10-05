@@ -19,7 +19,19 @@
                </padding>
             </Label>
          </graphic></Button>
-      <Button fx:id="analyze" mnemonicParsing="false" text="Analyze Data">
+      <Button fx:id="getData" mnemonicParsing="false" text="Get Data">
+         <graphic>
+            <Label text="" textFill="#3884e0">
+               <font>
+                  <Font name="FontAwesome" size="20.0" />
+               </font>
+               <padding>
+                  <Insets right="5.0" />
+               </padding>
+            </Label>
+         </graphic>
+      </Button>
+      <Button fx:id="analyze1" mnemonicParsing="false" text="Analyze Data">
          <graphic>
             <Label text="" textFill="#3366cc">
                <font>
