@@ -24,8 +24,15 @@
  */
 package org.rivierarobotics.sharpeyes;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.rivierarobotics.protos.Game;
 
 import com.google.common.io.Resources;
 
@@ -50,6 +57,21 @@ public class Loader {
     public static Image loadImage(String resource) {
         String normalizedName = PKG_PREFIX + resource + ".png";
         return new Image(Resources.getResource(normalizedName).toString());
+    }
+
+    public static URL getI18N(String resource) {
+        String normalizedName = PKG_PREFIX + "i18n/" + resource + ".lang";
+        return Resources.getResource(normalizedName);
+    }
+
+    public static Game getGame(Path path) {
+        Game game;
+        try (InputStream stream = new BufferedInputStream(Files.newInputStream(path))) {
+            game = Game.parseFrom(stream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return game;
     }
 
 }

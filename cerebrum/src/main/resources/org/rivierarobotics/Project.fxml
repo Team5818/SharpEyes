@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.111">
+   <left>
+      <ListView fx:id="dataView" BorderPane.alignment="CENTER" />
+   </left>
+   <center>
+      <TabPane fx:id="tabs" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+         <tabs>
+            <Tab closable="false" disable="true" style="visibility: false;" text="Hidden Tab" />
+         </tabs>
+      </TabPane>
+   </center>
+</BorderPane>

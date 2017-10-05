@@ -37,13 +37,16 @@ import java.util.concurrent.CompletableFuture;
 import org.rivierarobotics.protos.TransmitFrame;
 import org.rivierarobotics.sharpeyes.FXUtil;
 import org.rivierarobotics.sharpeyes.SharpEyes;
+import org.rivierarobotics.sharpeyes.data.DataProvider;
 import org.rivierarobotics.sharpeyes.data.transmission.TransmissionDataProvider;
 
+import com.google.auto.service.AutoService;
 import com.google.common.collect.AbstractIterator;
 
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
+@AutoService(DataProvider.class)
 public class FileDataProvider extends TransmissionDataProvider {
 
     private final FileChooser srcChooser = new FileChooser();

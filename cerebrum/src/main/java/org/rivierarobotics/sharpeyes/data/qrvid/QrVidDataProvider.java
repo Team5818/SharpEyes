@@ -32,17 +32,17 @@ import java.util.concurrent.Executors;
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.data.DataProvider;
 
+import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableList;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
+@AutoService(DataProvider.class)
 public class QrVidDataProvider implements DataProvider {
 
     private static final String START = "Please put the QR into the camera view.";
@@ -65,7 +65,7 @@ public class QrVidDataProvider implements DataProvider {
         return CompletableFuture.supplyAsync(this::doProvideMatches, exec)
                 .whenComplete((w, a) -> stage.close());
     }
-    
+
     private void asyncSetMessage(String message) {
         Platform.runLater(() -> messageLabel.setText(message));
     }
