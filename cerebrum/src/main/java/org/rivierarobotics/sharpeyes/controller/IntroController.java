@@ -12,6 +12,7 @@ import org.rivierarobotics.sharpeyes.i18n.SharpEyesI18N;
 
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -36,7 +37,7 @@ import javafx.stage.Window;
 public class IntroController {
 
     private static final class ICCell extends ListCell<Path> {
-        
+
         private final EventHandler<MouseEvent> dblClickHandler;
 
         ICCell(IntroController owner) {
@@ -116,6 +117,8 @@ public class IntroController {
 
     private void create() {
         CreateGameController controller = new CreateGameController(null);
+        // detach recents before hiding
+        recents.setItems(FXCollections.emptyObservableList());
         parentWindow.hide();
         controller.display();
     }
@@ -139,8 +142,11 @@ public class IntroController {
 
     private void openPath(Path chosen) {
         ProjectController controller = new ProjectController(SourcedGame.load(chosen));
+        // detach recents before hiding
+        recents.setItems(FXCollections.emptyObservableList());
         parentWindow.hide();
         controller.display();
+        RecentlyOpened.pushPath(chosen);
     }
 
 }
