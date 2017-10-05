@@ -54,9 +54,8 @@ public class SharpEyes extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.stage = primaryStage;
+        this.stage = applyCommonStageConfig(primaryStage);
         stage.setTitle(SharpEyesI18N.t("app.title"));
-        stage.getIcons().add(Loader.loadImage("icon"));
 
         Pane welcome = Loader.loadFxml("Intro", new IntroController(primaryStage));
 
@@ -66,13 +65,19 @@ public class SharpEyes extends Application {
         primaryStage.show();
     }
 
-    public static void addStyleSheets(Scene scene) {
+    public static Stage applyCommonStageConfig(Stage base) {
+        base.getIcons().add(Loader.loadImage("icon"));
+        return base;
+    }
+
+    public static Scene addStyleSheets(Scene scene) {
         Stream.of("CGField", "AdvancedConfig", "fonts")
                 .map(s -> s + ".css")
                 .map(Loader.PKG_PREFIX::concat)
                 .map(Resources::getResource)
                 .map(URL::toExternalForm)
                 .forEach(scene.getStylesheets()::add);
+        return scene;
     }
 
 }

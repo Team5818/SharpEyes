@@ -3,6 +3,7 @@ package org.rivierarobotics.sharpeyes.controller;
 import java.nio.file.Path;
 
 import org.rivierarobotics.sharpeyes.Loader;
+import org.rivierarobotics.sharpeyes.SharpEyes;
 import org.rivierarobotics.sharpeyes.data.SourcedGame;
 import org.rivierarobotics.sharpeyes.fx.PathListCell;
 import org.rivierarobotics.sharpeyes.i18n.SharpEyesI18N;
@@ -34,7 +35,7 @@ public class ProjectController {
 
     }
 
-    private final Stage parentWindow = new Stage();
+    private final Stage parentWindow = SharpEyes.applyCommonStageConfig(new Stage());
     private final SourcedGame game;
 
     @FXML
@@ -64,7 +65,7 @@ public class ProjectController {
         VBox vbox = new VBox();
         VBox.setVgrow(node, Priority.ALWAYS);
         vbox.getChildren().addAll(MenuController.create(game), node);
-        parentWindow.setScene(new Scene(vbox, 800, 600));
+        parentWindow.setScene(SharpEyes.addStyleSheets(new Scene(vbox, 800, 600)));
         parentWindow.setTitle(game.getGame().getName() + " - " + SharpEyesI18N.t("app.title"));
         parentWindow.setMaximized(true);
         parentWindow.show();

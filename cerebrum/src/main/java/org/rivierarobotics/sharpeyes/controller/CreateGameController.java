@@ -65,7 +65,7 @@ import javafx.stage.Stage;
 public class CreateGameController {
 
     private final ObservableList<ObservableBooleanValue> submissionReqs = FXCollections.observableArrayList();
-    private final Stage parentWindow = new Stage();
+    private final Stage parentWindow = SharpEyes.applyCommonStageConfig(new Stage());
 
     private SourcedGame original;
 
@@ -92,7 +92,7 @@ public class CreateGameController {
         } else {
             parentWindow.setTitle(ft("edit.game.title", original.getGame().getName()) + " - " + t("app.title"));
         }
-        parentWindow.setScene(new Scene(node, 800, 600));
+        parentWindow.setScene(SharpEyes.addStyleSheets(new Scene(node, 800, 600)));
         parentWindow.centerOnScreen();
         parentWindow.show();
     }
