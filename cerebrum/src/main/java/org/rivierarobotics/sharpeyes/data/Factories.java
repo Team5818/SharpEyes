@@ -1,6 +1,6 @@
 package org.rivierarobotics.sharpeyes.data;
 
-import org.rivierarobotics.sharpeyes.data.file.FileDataProvider;
+import org.rivierarobotics.sharpeyes.data.file.InteractiveFileDataProvider;
 import org.rivierarobotics.sharpeyes.data.qrvid.QrVidDataProvider;
 
 import com.google.auto.service.AutoService;
@@ -14,7 +14,7 @@ class Factories {
 
         @Override
         public DataProvider create(Window parentWindow) {
-            return new FileDataProvider(parentWindow);
+            return new InteractiveFileDataProvider(parentWindow);
         }
 
         @Override

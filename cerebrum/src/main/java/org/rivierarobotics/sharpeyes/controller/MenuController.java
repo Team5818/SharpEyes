@@ -24,8 +24,9 @@
  */
 package org.rivierarobotics.sharpeyes.controller;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.rivierarobotics.sharpeyes.Loader;
-import org.rivierarobotics.sharpeyes.data.SourcedGame;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -33,26 +34,24 @@ import javafx.scene.control.ToolBar;
 
 public class MenuController {
 
-    public static ToolBar create(SourcedGame game) {
-        return Loader.loadFxml("MainMenu", new MenuController(game));
-    }
-
-    private final SourcedGame game;
-
-    public MenuController(SourcedGame game) {
-        this.game = game;
+    public static ControlledNode<MenuController, ToolBar> create() {
+        return Loader.loadFxmlCN("MainMenu", new MenuController());
     }
 
     @FXML
     private Button edit;
+    @FXML
+    private Button analyze;
 
     public void initialize() {
-        edit.setOnAction(event -> editGame());
     }
 
-    private void editGame() {
-        CreateGameController controller = new CreateGameController(game);
-        controller.display();
+    public Button getEdit() {
+        return checkNotNull(edit);
+    }
+
+    public Button getAnalyze() {
+        return checkNotNull(analyze);
     }
 
 }

@@ -56,7 +56,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Control;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -65,7 +64,7 @@ import javafx.stage.Stage;
 public class CreateGameController {
 
     private final ObservableList<ObservableBooleanValue> submissionReqs = FXCollections.observableArrayList();
-    private final Stage parentWindow = SharpEyes.applyCommonStageConfig(new Stage());
+    private final Stage parentWindow = SharpEyes.applyCommonStageConfig(new Stage(), true);
 
     private SourcedGame original;
 
@@ -73,7 +72,7 @@ public class CreateGameController {
     private Pane fields;
 
     @FXML
-    private Control addNewFieldLabelButton;
+    private Button addNewField;
 
     @FXML
     private TextField gameName;
@@ -107,8 +106,9 @@ public class CreateGameController {
         submit.getProperties().put("submissionReqsRef", subReqs);
         submit.disableProperty().bind(subReqs);
         submit.setOnAction(event -> onSubmit());
+        submit.setDefaultButton(true);
 
-        addNewFieldLabelButton.setOnMouseClicked(event -> addNewField());
+        addNewField.setOnAction(event -> addNewField());
 
         if (original != null) {
             gameName.setText(original.getGame().getName());

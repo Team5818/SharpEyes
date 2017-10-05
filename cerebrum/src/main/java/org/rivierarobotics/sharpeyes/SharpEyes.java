@@ -27,14 +27,10 @@ package org.rivierarobotics.sharpeyes;
 import java.net.URL;
 import java.util.stream.Stream;
 
-import org.rivierarobotics.sharpeyes.controller.IntroController;
-import org.rivierarobotics.sharpeyes.i18n.SharpEyesI18N;
-
 import com.google.common.io.Resources;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
@@ -50,23 +46,16 @@ public class SharpEyes extends Application {
         Application.launch(args);
     }
 
-    private Stage stage;
-
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.stage = applyCommonStageConfig(primaryStage);
-        stage.setTitle(SharpEyesI18N.t("app.title"));
-
-        Pane welcome = Loader.loadFxml("Intro", new IntroController(primaryStage));
-
-        primaryStage.setScene(new Scene(welcome, 800, 600));
-        addStyleSheets(stage.getScene());
-        primaryStage.centerOnScreen();
-        primaryStage.show();
+        IntroReopener.registerStage(primaryStage);
     }
 
-    public static Stage applyCommonStageConfig(Stage base) {
+    public static Stage applyCommonStageConfig(Stage base, boolean register) {
         base.getIcons().add(Loader.loadImage("icon"));
+        if (register) {
+            IntroReopener.registerStage(base);
+        }
         return base;
     }
 

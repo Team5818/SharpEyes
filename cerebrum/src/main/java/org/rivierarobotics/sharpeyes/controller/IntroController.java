@@ -44,7 +44,9 @@ public class IntroController {
             setContentDisplay(ContentDisplay.RIGHT);
             dblClickHandler = event -> {
                 if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-                    owner.openPath(getItem());
+                    if (getItem() != null) {
+                        owner.openPath(getItem());
+                    }
                 }
             };
             setOnMouseClicked(dblClickHandler);
@@ -102,7 +104,9 @@ public class IntroController {
         title.setText(SharpEyesI18N.t("app.title.stylized"));
         version.setText(SharpEyesI18N.t("app.version"));
 
-        recents.setItems(RecentlyOpened.getRecents());
+        parentWindow.setOnShown(event -> {
+            recents.setItems(RecentlyOpened.getRecents());
+        });
         recents.setCellFactory(lv -> new ICCell(this));
         // hide the recents if empty
         SimpleListProperty<Path> recentsProp = new SimpleListProperty<>();

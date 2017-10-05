@@ -33,10 +33,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.rivierarobotics.protos.Game;
+import org.rivierarobotics.sharpeyes.controller.ControlledNode;
 
 import com.google.common.io.Resources;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 
@@ -53,6 +55,11 @@ public class Loader {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public static <C, N extends Node> ControlledNode<C, N> loadFxmlCN(String resource, C controller) {
+        N node = loadFxml(resource, controller);
+        return ControlledNode.wrap(controller, node);
     }
 
     public static Image loadImage(String resource) {

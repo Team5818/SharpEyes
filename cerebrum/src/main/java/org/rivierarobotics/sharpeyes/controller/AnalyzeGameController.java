@@ -26,83 +26,90 @@ package org.rivierarobotics.sharpeyes.controller;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.rivierarobotics.protos.FieldDefinition;
 import org.rivierarobotics.protos.FieldValue;
-import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.protos.TeamMatch;
+import org.rivierarobotics.sharpeyes.SharpEyes;
 import org.rivierarobotics.sharpeyes.common.FieldDefHelper;
-import org.rivierarobotics.sharpeyes.data.DataProvider;
+import org.rivierarobotics.sharpeyes.data.SourcedGame;
+import org.rivierarobotics.sharpeyes.data.file.FileDataProvider;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.TableColumn.SortType;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.Pane;
 import javafx.util.Callback;
 
 public class AnalyzeGameController {
 
-    private final DataProvider dataProvider;
-    private final Game game;
+    private final SourcedGame game;
 
-    public AnalyzeGameController(DataProvider dataProvider, Game game) {
-        this.dataProvider = dataProvider;
+    public AnalyzeGameController(SourcedGame game) {
         this.game = game;
     }
-
-    @FXML
-    private Button getData;
-
-    @FXML
-    private Pane tableRecontainer;
 
     @FXML
     private TableView<TeamMatch> dataTable;
 
     public void initialize() {
-        bindGetData();
         setupTable();
+        loadMatches();
     }
 
-    private void bindGetData() {
-        getData.setOnAction(event -> getData());
+    private void loadMatches() {
+        ImmutableList.Builder<TeamMatch> matches = ImmutableList.builder();
+        try (Stream<Path> projectFiles = Files.list(game.getSource().getParent())) {
+            List<CompletableFuture<Stream<TeamMatch>>> matchData = projectFiles
+                    .filter(p -> p.toString().endsWith("." + SharpEyes.FRTSM_EXTENSION))
+                    .map(this::loadFtsm)
+                    .collect(toImmutableList());
+            // wait for all...
+            matchData.stream().map(cf -> {
+                try {
+                    return cf.get();
+                } catch (ExecutionException e) {
+                    Throwables.throwIfUnchecked(e.getCause());
+                    throw new RuntimeException(e.getCause());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
+            }).flatMap(Function.identity()).forEach(matches::add);
+            // and fly with it!
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        loadData(matches.build());
     }
 
-    private void getData() {
-        dataProvider.provideMatches().thenAccept(matches -> {
-            Platform.runLater(() -> loadData(matches));
-        });
+    private CompletableFuture<Stream<TeamMatch>> loadFtsm(Path ftsm) {
+        return new FileDataProvider(ftsm).provideMatches().thenApply(List::stream);
     }
 
     private void loadData(List<TeamMatch> matches) {
-        List<TeamMatch> mistakes = matches.stream()
-                .filter(m -> !game.getName().equals(m.getGame()))
-                .collect(toImmutableList());
-        if (!mistakes.isEmpty()) {
-            String name = mistakes.get(0).getGame();
-            Alert alert = new Alert(AlertType.ERROR, "Incorrect game '" + name + "', expected '" + game.getName() + "'.");
-            alert.setResizable(true);
-            alert.showAndWait();
-            return;
-        }
         dataTable.getItems().setAll(matches);
         // re-sort
         dataTable.sort();
@@ -113,8 +120,8 @@ public class AnalyzeGameController {
         addColumn("Team Number", fvMaker((m, fv) -> fv.setInteger(m.getTeamNumber())));
         addColumn("Match Number", fvMaker((m, fv) -> fv.setInteger(m.getMatchNumber())));
 
-        for (int i = 0; i < game.getFieldDefsCount(); i++) {
-            FieldDefinition def = game.getFieldDefs(i);
+        for (int i = 0; i < game.getGame().getFieldDefsCount(); i++) {
+            FieldDefinition def = game.getGame().getFieldDefs(i);
             String colName = def.getName();
             if (!def.getNotHasUnit()) {
                 // ... aka hasUnit :P
@@ -135,7 +142,7 @@ public class AnalyzeGameController {
     }
 
     private long computeWeight(TeamMatch m) {
-        return game.getFieldDefsList().stream()
+        return game.getGame().getFieldDefsList().stream()
                 .mapToLong(field -> getWeight(field, m.getValuesOrThrow(field.getName())))
                 .sum();
     }
@@ -215,7 +222,7 @@ public class AnalyzeGameController {
                 return Optional.of(FDEF_WEIGHT);
             default:
         }
-        return game.getFieldDefsList().stream().filter(def -> name.equals(def.getName())).findFirst();
+        return game.getGame().getFieldDefsList().stream().filter(def -> name.equals(def.getName())).findFirst();
     }
 
     private static boolean isNumber(FieldValue value) {

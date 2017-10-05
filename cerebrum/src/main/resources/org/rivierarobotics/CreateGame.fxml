@@ -3,11 +3,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
 
 <VBox alignment="TOP_CENTER" spacing="5.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <children>
@@ -27,24 +28,47 @@
       <VBox alignment="TOP_CENTER">
          <children>
             <VBox fx:id="fields" alignment="TOP_CENTER" />
-            <Label fx:id="addNewFieldLabelButton" style="-fx-background-color: rgba(143, 244, 66, 70); -fx-background-radius: 10;" text="Add New Field" textAlignment="CENTER" VBox.vgrow="NEVER">
-               <font>
-                  <Font size="20.0" />
-               </font>
+            <Separator prefWidth="200.0">
                <VBox.margin>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </VBox.margin>
-               <padding>
-                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-               </padding>
-            </Label>
+            </Separator>
+            <Button fx:id="addNewField" mnemonicParsing="false" style="-fx-base: #fefde7;" text="Add New Field">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" />
+               </VBox.margin>
+               <graphic>
+                  <Label text="" textFill="#464ef0">
+                     <font>
+                        <Font name="FontAwesome" size="20.0" />
+                     </font>
+                     <padding>
+                        <Insets right="5.0" />
+                     </padding>
+                  </Label>
+               </graphic>
+            </Button>
          </children>
       </VBox>
-      <Button fx:id="submit" alignment="CENTER" mnemonicParsing="false" style="-fx-background-color: rgb(30, 200, 100);" text="Create Game">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </Button>
+      <HBox alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS">
+         <children>
+            <Button fx:id="submit" alignment="CENTER" mnemonicParsing="false" style="-fx-base: rgb(30, 200, 100);" text="Create Game">
+               <font>
+                  <Font size="14.0" />
+               </font>
+               <graphic>
+                  <Label text="" textFill="#ffea4c">
+                     <font>
+                        <Font name="FontAwesome" size="20.0" />
+                     </font>
+                     <padding>
+                        <Insets right="5.0" />
+                     </padding>
+                  </Label>
+               </graphic>
+            </Button>
+         </children>
+      </HBox>
    </children>
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
