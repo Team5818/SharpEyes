@@ -30,9 +30,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.rivierarobotics.protos.TeamMatch;
-import org.rivierarobotics.sharpeyes.data.DataProvider;
+import org.rivierarobotics.sharpeyes.data.transmission.TransmissionDataProvider;
 
-import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableList;
 
 import javafx.application.Platform;
@@ -42,8 +41,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
-@AutoService(DataProvider.class)
-public class QrVidDataProvider implements DataProvider {
+public class QrVidDataProvider extends TransmissionDataProvider {
 
     private static final String START = "Please put the QR into the camera view.";
 
@@ -57,13 +55,15 @@ public class QrVidDataProvider implements DataProvider {
     private final ExecutorService exec = Executors.newCachedThreadPool();
 
     @Override
-    public CompletableFuture<List<TeamMatch>> provideMatches() {
+    protected CompletableFuture<ImportedFrames> getFrames() {
         Stage stage = new Stage();
         currentMessage.set(START);
         stage.setScene(new Scene(messageLabel, 800, 600));
         stage.show();
-        return CompletableFuture.supplyAsync(this::doProvideMatches, exec)
-                .whenComplete((w, a) -> stage.close());
+        // TODO finish qr vid
+        return null;
+        // return CompletableFuture.supplyAsync(this::doProvideMatches, exec)
+        // .whenComplete((w, a) -> stage.close());
     }
 
     private void asyncSetMessage(String message) {

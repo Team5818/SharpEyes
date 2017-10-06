@@ -26,20 +26,16 @@ package org.rivierarobotics.sharpeyes.data.file;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.FXUtil;
 import org.rivierarobotics.sharpeyes.SharpEyes;
 import org.rivierarobotics.sharpeyes.data.DataProvider;
-
-import com.google.auto.service.AutoService;
+import org.rivierarobotics.sharpeyes.data.ImportedMatches;
 
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
-@AutoService(DataProvider.class)
 public class InteractiveFileDataProvider implements DataProvider {
 
     private final FileChooser srcChooser = new FileChooser();
@@ -64,10 +60,10 @@ public class InteractiveFileDataProvider implements DataProvider {
     }
 
     @Override
-    public CompletableFuture<List<TeamMatch>> provideMatches() {
+    public CompletableFuture<ImportedMatches> provideMatches() {
         Path src = requestSource();
         if (src == null) {
-            CompletableFuture<List<TeamMatch>> f = new CompletableFuture<>();
+            CompletableFuture<ImportedMatches> f = new CompletableFuture<>();
             f.cancel(true);
             return f;
         }

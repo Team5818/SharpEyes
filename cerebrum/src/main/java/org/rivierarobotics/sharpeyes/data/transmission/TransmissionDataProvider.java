@@ -27,21 +27,35 @@ package org.rivierarobotics.sharpeyes.data.transmission;
 import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.protos.TransmitFrame;
 import org.rivierarobotics.protos.TransmitFrame.KindCase;
 import org.rivierarobotics.sharpeyes.data.DataProvider;
+import org.rivierarobotics.sharpeyes.data.ImportedMatches;
 
 import com.google.common.collect.ImmutableList;
 
 public abstract class TransmissionDataProvider implements DataProvider {
 
+    protected static final class ImportedFrames {
+
+        private final String name;
+        private final Iterator<TransmitFrame> frames;
+
+        public ImportedFrames(String name, Iterator<TransmitFrame> frames) {
+            super();
+            this.name = name;
+            this.frames = frames;
+        }
+
+    }
+
     @Override
-    public CompletableFuture<List<TeamMatch>> provideMatches() {
-        return getFrames().thenApply(frames -> {
+    public CompletableFuture<ImportedMatches> provideMatches() {
+        return getFrames().thenApply(imported -> {
+            Iterator<TransmitFrame> frames = imported.frames;
             ImmutableList.Builder<TeamMatch> b = ImmutableList.builder();
             checkState(frames.hasNext(), "no frames!");
             TransmitFrame tf = frames.next();
@@ -55,10 +69,10 @@ public abstract class TransmissionDataProvider implements DataProvider {
                 b.add(tf.getMatch());
             }
             checkState(tf.getKindCase() == KindCase.END, "improperly ended stream!");
-            return b.build();
+            return ImportedMatches.wrap(imported.name, b.build());
         });
     }
 
-    protected abstract CompletableFuture<Iterator<TransmitFrame>> getFrames();
+    protected abstract CompletableFuture<ImportedFrames> getFrames();
 
 }

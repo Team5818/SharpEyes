@@ -31,7 +31,7 @@
             </Label>
          </graphic>
       </Button>
-      <Button fx:id="analyze1" mnemonicParsing="false" text="Analyze Data">
+      <Button fx:id="analyze" mnemonicParsing="false" text="Analyze Data">
          <graphic>
             <Label text="" textFill="#3366cc">
                <font>

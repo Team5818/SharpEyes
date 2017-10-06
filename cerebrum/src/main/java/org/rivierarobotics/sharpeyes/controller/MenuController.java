@@ -41,6 +41,8 @@ public class MenuController {
     @FXML
     private Button edit;
     @FXML
+    private Button getData;
+    @FXML
     private Button analyze;
 
     public void initialize() {
@@ -48,6 +50,10 @@ public class MenuController {
 
     public Button getEdit() {
         return checkNotNull(edit);
+    }
+
+    public Button getGetData() {
+        return checkNotNull(getData);
     }
 
     public Button getAnalyze() {

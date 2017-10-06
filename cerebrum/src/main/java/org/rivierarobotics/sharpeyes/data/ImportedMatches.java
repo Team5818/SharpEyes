@@ -24,10 +24,26 @@
  */
 package org.rivierarobotics.sharpeyes.data;
 
-import java.util.concurrent.CompletableFuture;
+import org.rivierarobotics.protos.TeamMatch;
 
-public interface DataProvider {
+import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 
-    CompletableFuture<ImportedMatches> provideMatches();
+/**
+ * Result of importing matches from a {@link DataProvider}.
+ */
+@AutoValue
+public abstract class ImportedMatches {
+
+    public static ImportedMatches wrap(String name, Iterable<TeamMatch> matches) {
+        return new AutoValue_ImportedMatches(name, ImmutableList.copyOf(matches));
+    }
+
+    ImportedMatches() {
+    }
+
+    public abstract String getName();
+
+    public abstract ImmutableList<TeamMatch> getMatches();
 
 }

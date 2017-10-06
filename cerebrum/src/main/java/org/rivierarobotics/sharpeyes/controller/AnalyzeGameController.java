@@ -44,6 +44,7 @@ import org.rivierarobotics.protos.FieldValue;
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.SharpEyes;
 import org.rivierarobotics.sharpeyes.common.FieldDefHelper;
+import org.rivierarobotics.sharpeyes.data.ImportedMatches;
 import org.rivierarobotics.sharpeyes.data.SourcedGame;
 import org.rivierarobotics.sharpeyes.data.file.FileDataProvider;
 
@@ -106,7 +107,9 @@ public class AnalyzeGameController {
     }
 
     private CompletableFuture<Stream<TeamMatch>> loadFtsm(Path ftsm) {
-        return new FileDataProvider(ftsm).provideMatches().thenApply(List::stream);
+        return new FileDataProvider(ftsm).provideMatches()
+                .thenApply(ImportedMatches::getMatches)
+                .thenApply(List::stream);
     }
 
     private void loadData(List<TeamMatch> matches) {

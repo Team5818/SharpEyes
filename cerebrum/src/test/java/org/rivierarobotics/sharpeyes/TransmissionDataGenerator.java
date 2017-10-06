@@ -24,9 +24,9 @@
  */
 package org.rivierarobotics.sharpeyes;
 
-import java.io.BufferedOutputStream;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,12 +34,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import org.rivierarobotics.protos.FieldDefinition;
 import org.rivierarobotics.protos.FieldValue;
 import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.protos.TeamMatch;
-import org.rivierarobotics.protos.TransmitFrame;
+import org.rivierarobotics.sharpeyes.common.TransmissionDataWriter;
 import org.rivierarobotics.sharpeyes.data.transmission.TransmissionDataProvider;
 
 /**
@@ -55,19 +56,10 @@ public class TransmissionDataGenerator {
     public static void main(String[] args) throws IOException {
         Game game = Game.parseFrom(Files.readAllBytes(GAME_REF));
         int number = getInt("Number of matches");
-        try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(OUTPUT))) {
-            TransmitFrame.newBuilder()
-                    .setStart(true)
-                    .build().writeDelimitedTo(out);
-            for (int i = 0; i < number; i++) {
-                TransmitFrame.newBuilder()
-                        .setMatch(generateMatch(game, i))
-                        .build().writeDelimitedTo(out);
-            }
-            TransmitFrame.newBuilder()
-                    .setEnd(true)
-                    .build().writeDelimitedTo(out);
-        }
+        List<TeamMatch> matches = IntStream.range(0, number)
+                .mapToObj(i -> generateMatch(game, i))
+                .collect(toImmutableList());
+        new TransmissionDataWriter(matches).writeToPath(OUTPUT);
     }
 
     private static final Random RNG = new Random();
