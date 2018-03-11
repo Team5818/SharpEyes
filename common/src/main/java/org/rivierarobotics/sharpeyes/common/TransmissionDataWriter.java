@@ -24,39 +24,29 @@
  */
 package org.rivierarobotics.sharpeyes.common;
 
+import org.rivierarobotics.protos.AddTeamMatches;
+import org.rivierarobotics.protos.CompactTeamMatch;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-
-import org.rivierarobotics.protos.TeamMatch;
-import org.rivierarobotics.protos.TransmitFrame;
-
-import com.google.common.collect.ImmutableList;
 
 public final class TransmissionDataWriter {
 
-    private final List<TeamMatch> matches;
+    private final List<CompactTeamMatch> matches;
 
-    public TransmissionDataWriter(List<TeamMatch> matches) {
-        this.matches = ImmutableList.copyOf(matches);
+    public TransmissionDataWriter(List<CompactTeamMatch> matches) {
+        this.matches = new ArrayList<>(matches);
     }
 
     public void writeToPath(Path path) throws IOException {
         try (OutputStream out = new BufferedOutputStream(Files.newOutputStream(path))) {
-            TransmitFrame.newBuilder()
-                    .setStart(true)
-                    .build().writeDelimitedTo(out);
-            for (int i = 0; i < matches.size(); i++) {
-                TransmitFrame.newBuilder()
-                        .setMatch(matches.get(i))
-                        .build().writeDelimitedTo(out);
-            }
-            TransmitFrame.newBuilder()
-                    .setEnd(true)
-                    .build().writeDelimitedTo(out);
+            AddTeamMatches.newBuilder().addAllMatches(matches).build()
+                    .writeTo(out);
         }
     }
 

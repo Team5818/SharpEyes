@@ -28,6 +28,7 @@ import java.nio.file.Path;
 
 import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.sharpeyes.Loader;
+import org.rivierarobotics.sharpeyes.common.GameTreeMerger;
 
 import com.google.auto.value.AutoValue;
 
@@ -38,10 +39,10 @@ import com.google.auto.value.AutoValue;
 public abstract class SourcedGame {
     
     public static SourcedGame load(Path source) {
-        return wrap(source, Loader.getGame(source));
+        return wrap(source, GameTreeMerger.startingWith(Loader.getGame(source)));
     }
     
-    public static SourcedGame wrap(Path source, Game game) {
+    public static SourcedGame wrap(Path source, GameTreeMerger game) {
         return new AutoValue_SourcedGame(source, game);
     }
 
@@ -50,6 +51,6 @@ public abstract class SourcedGame {
 
     public abstract Path getSource();
 
-    public abstract Game getGame();
+    public abstract GameTreeMerger getGame();
 
 }

@@ -24,34 +24,21 @@
  */
 package org.rivierarobotics.sharpeyes.controller;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import org.rivierarobotics.protos.FieldDefinition;
-import org.rivierarobotics.protos.FieldValue;
-import org.rivierarobotics.protos.TeamMatch;
-import org.rivierarobotics.sharpeyes.SharpEyes;
-import org.rivierarobotics.sharpeyes.common.FieldDefHelper;
-import org.rivierarobotics.sharpeyes.data.ImportedMatches;
-import org.rivierarobotics.sharpeyes.data.SourcedGame;
-import org.rivierarobotics.sharpeyes.data.file.FileDataProvider;
-
-import com.google.common.base.Throwables;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+
+import org.rivierarobotics.protos.CompactTeamMatch;
+import org.rivierarobotics.protos.FieldDefinition;
+import org.rivierarobotics.protos.FieldValue;
+import org.rivierarobotics.sharpeyes.common.FieldDefHelper;
+import org.rivierarobotics.sharpeyes.data.SourcedGame;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -64,6 +51,8 @@ import javafx.scene.control.TableColumn.SortType;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 public class AnalyzeGameController {
 
     private final SourcedGame game;
@@ -73,7 +62,7 @@ public class AnalyzeGameController {
     }
 
     @FXML
-    private TableView<TeamMatch> dataTable;
+    private TableView<CompactTeamMatch> dataTable;
 
     public void initialize() {
         setupTable();
@@ -81,50 +70,25 @@ public class AnalyzeGameController {
     }
 
     private void loadMatches() {
-        ImmutableList.Builder<TeamMatch> matches = ImmutableList.builder();
-        try (Stream<Path> projectFiles = Files.list(game.getSource().getParent())) {
-            List<CompletableFuture<Stream<TeamMatch>>> matchData = projectFiles
-                    .filter(p -> p.toString().endsWith("." + SharpEyes.FRTSM_EXTENSION))
-                    .map(this::loadFtsm)
-                    .collect(toImmutableList());
-            // wait for all...
-            matchData.stream().map(cf -> {
-                try {
-                    return cf.get();
-                } catch (ExecutionException e) {
-                    Throwables.throwIfUnchecked(e.getCause());
-                    throw new RuntimeException(e.getCause());
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException(e);
-                }
-            }).flatMap(Function.identity()).forEach(matches::add);
-            // and fly with it!
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        loadData(matches.build());
+        ImmutableList<CompactTeamMatch> matches = game.getGame()
+                .getAllMatches()
+                .collect(toImmutableList());
+        loadData(matches);
     }
 
-    private CompletableFuture<Stream<TeamMatch>> loadFtsm(Path ftsm) {
-        return new FileDataProvider(ftsm).provideMatches()
-                .thenApply(ImportedMatches::getMatches)
-                .thenApply(List::stream);
-    }
-
-    private void loadData(List<TeamMatch> matches) {
+    private void loadData(List<CompactTeamMatch> matches) {
         dataTable.getItems().setAll(matches);
         // re-sort
         dataTable.sort();
     }
 
     private void setupTable() {
-        addColumn("Regional", fvMaker((m, fv) -> fv.setStr(m.getRegional())));
+        addColumn("Regional", fvMaker((m, fv) -> fv.setStr(m.getRegionalName())));
         addColumn("Team Number", fvMaker((m, fv) -> fv.setInteger(m.getTeamNumber())));
         addColumn("Match Number", fvMaker((m, fv) -> fv.setInteger(m.getMatchNumber())));
 
-        for (int i = 0; i < game.getGame().getFieldDefsCount(); i++) {
-            FieldDefinition def = game.getGame().getFieldDefs(i);
+        for (int i = 0; i < game.getGame().getCurrentInstance().getFieldDefsCount(); i++) {
+            FieldDefinition def = game.getGame().getCurrentInstance().getFieldDefs(i);
             String colName = def.getName();
             if (!def.getNotHasUnit()) {
                 // ... aka hasUnit :P
@@ -139,13 +103,13 @@ public class AnalyzeGameController {
         addColumn("Weight", fvMaker((m, fv) -> fv.setInteger(computeWeight(m))));
 
         // sort weight by default
-        TableColumn<TeamMatch, ?> weightCol = Iterables.getLast(dataTable.getColumns());
+        TableColumn<CompactTeamMatch, ?> weightCol = Iterables.getLast(dataTable.getColumns());
         dataTable.getSortOrder().add(0, weightCol);
         weightCol.setSortType(SortType.DESCENDING);
     }
 
-    private long computeWeight(TeamMatch m) {
-        return game.getGame().getFieldDefsList().stream()
+    private long computeWeight(CompactTeamMatch m) {
+        return game.getGame().getCurrentInstance().getFieldDefsList().stream()
                 .mapToLong(field -> getWeight(field, m.getValuesOrThrow(field.getName())))
                 .sum();
     }
@@ -162,9 +126,9 @@ public class AnalyzeGameController {
         return wtIndex < 0 || wtIndex >= field.getWeightsCount() ? 0 : field.getWeights(wtIndex);
     }
 
-    private Callback<CellDataFeatures<TeamMatch, FieldValue>, ObservableValue<FieldValue>> fvMaker(BiConsumer<TeamMatch, FieldValue.Builder> setter) {
+    private Callback<CellDataFeatures<CompactTeamMatch, FieldValue>, ObservableValue<FieldValue>> fvMaker(BiConsumer<CompactTeamMatch, FieldValue.Builder> setter) {
         return p -> {
-            TeamMatch m = p.getValue();
+            CompactTeamMatch m = p.getValue();
             FieldValue.Builder fv = FieldValue.newBuilder();
             setter.accept(m, fv);
             return new SimpleObjectProperty<>(fv.build());
@@ -186,8 +150,8 @@ public class AnalyzeGameController {
         }
     }
 
-    private void addColumn(String name, Callback<CellDataFeatures<TeamMatch, FieldValue>, ObservableValue<FieldValue>> callback) {
-        TableColumn<TeamMatch, FieldValue> col = new TableColumn<>(name);
+    private void addColumn(String name, Callback<CellDataFeatures<CompactTeamMatch, FieldValue>, ObservableValue<FieldValue>> callback) {
+        TableColumn<CompactTeamMatch, FieldValue> col = new TableColumn<>(name);
         col.setCellValueFactory(callback);
         col.setCellFactory(tc -> {
             return new AGCTableCell();
@@ -225,7 +189,7 @@ public class AnalyzeGameController {
                 return Optional.of(FDEF_WEIGHT);
             default:
         }
-        return game.getGame().getFieldDefsList().stream().filter(def -> name.equals(def.getName())).findFirst();
+        return game.getGame().getCurrentInstance().getFieldDefsList().stream().filter(def -> name.equals(def.getName())).findFirst();
     }
 
     private static boolean isNumber(FieldValue value) {
@@ -238,7 +202,7 @@ public class AnalyzeGameController {
         }
     }
 
-    private static final class AGCTableCell extends TableCell<TeamMatch, FieldValue> {
+    private static final class AGCTableCell extends TableCell<CompactTeamMatch, FieldValue> {
 
         @Override
         protected void updateItem(FieldValue item, boolean empty) {

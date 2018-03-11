@@ -8,14 +8,14 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'com.techshroom', name: 'Aversion', version: '3.0.0'
+        classpath group: 'com.techshroom', name: 'Aversion', version: '3.0.1'
     }
 }
 plugins {
-    id "com.google.protobuf" version "0.8.1"
-    id "com.github.hierynomus.license" version "0.13.1"
-    id 'net.researchgate.release' version '2.5.0'
-    id "com.github.johnrengelman.shadow" version "1.2.4"
+    id "com.google.protobuf" version "0.8.3"
+    id "com.github.hierynomus.license" version "0.14.0"
+    id 'net.researchgate.release' version '2.6.0'
+    id "com.github.johnrengelman.shadow" version "2.0.2"
 }
 
 apply plugin: 'aversion-apt'
@@ -40,26 +40,8 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
-    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
-    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.10'
+    compile group: 'com.techshroom', name: 'jsr305-plus', version: '0.0.1'
     compile group: 'com.google.protobuf', name: 'protobuf-java', version: rootProject.protobufVersion
-
-    addAPTReqWComp group: 'com.google.guava', name: 'guava', version: '23.0'
-    addAPT group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc3'
-    addAPT group: 'com.google.auto.value', name: 'auto-value', version: '1.5'
-    addAPTReq name: 'aopalliance'
-    addAPTReq name: 'asm'
-    addAPTReq name: 'auto-value'
-    addAPTReq name: 'auto-common'
-    addAPTReq name: 'cglib'
-    addAPTReq name: 'commons-collections'
-    addAPTReq name: 'commons-lang'
-    addAPTReq name: 'dagger'
-    addAPTReq name: 'javawriter'
-    addAPTReq name: 'javax.inject'
-    addAPTReq name: 'velocity'
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
@@ -91,7 +73,7 @@ license {
     header = rootProject.file('HEADER.txt')
     ignoreFailures = false
     strictCheck = true
-    include '**/*.java'
+    include 'src/**/*.java'
     mapping {
         java = 'SLASHSTAR_STYLE'
     }
@@ -107,6 +89,11 @@ eclipse.classpath.file {
         attrNode.appendNode('attribute', ['name': 'optional', 'value': 'true']);
     }
 }
+// hack in generate files for idea
+apply plugin: 'idea'
+def protoGenerated = new File(project.buildDir, 'generated/source/proto/main/java')
+sourceSets.main.java.srcDir protoGenerated
+idea.module.generatedSourceDirs += protoGenerated
 
 import java.util.jar.Attributes.Name
 

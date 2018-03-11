@@ -24,10 +24,12 @@
  */
 package org.rivierarobotics.sharpeyes.data;
 
+import org.rivierarobotics.protos.AddTeamMatches;
+
 import java.util.concurrent.CompletableFuture;
 
 public interface DataProvider {
 
-    CompletableFuture<ImportedMatches> provideMatches();
+    CompletableFuture<AddTeamMatches> provideMatches();
 
 }

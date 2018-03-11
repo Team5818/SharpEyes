@@ -1,0 +1,18 @@
+// Communication protocols. These are used in NFC tags to transfer data.
+syntax = "proto3";
+option java_package = "org.rivierarobotics.protos";
+option java_multiple_files = true;
+
+import "matchDef.proto";
+
+message CompactTeamMatch {
+    string gameName = 1;
+    string regionalName = 2;
+    uint32 matchNumber = 3;
+    uint32 teamNumber = 4;
+    map<string, FieldValue> values = 5;
+}
+
+message AddTeamMatches {
+    repeated CompactTeamMatch matches = 1;
+}

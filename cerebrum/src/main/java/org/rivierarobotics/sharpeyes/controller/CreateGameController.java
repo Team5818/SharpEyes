@@ -39,6 +39,7 @@ import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.sharpeyes.FXUtil;
 import org.rivierarobotics.sharpeyes.Loader;
 import org.rivierarobotics.sharpeyes.SharpEyes;
+import org.rivierarobotics.sharpeyes.common.GameTreeMerger;
 import org.rivierarobotics.sharpeyes.config.RecentlyOpened;
 import org.rivierarobotics.sharpeyes.data.SourcedGame;
 import org.rivierarobotics.sharpeyes.event.DeleteFieldEvent;
@@ -89,7 +90,7 @@ public class CreateGameController {
         if (original == null) {
             parentWindow.setTitle(t("create.game.title") + " - " + t("app.title"));
         } else {
-            parentWindow.setTitle(ft("edit.game.title", original.getGame().getName()) + " - " + t("app.title"));
+            parentWindow.setTitle(ft("edit.game.title", original.getGame().getCurrentInstance().getName()) + " - " + t("app.title"));
         }
         parentWindow.setScene(SharpEyes.addStyleSheets(new Scene(node, 800, 600)));
         parentWindow.centerOnScreen();
@@ -111,8 +112,8 @@ public class CreateGameController {
         addNewField.setOnAction(event -> addNewField());
 
         if (original != null) {
-            gameName.setText(original.getGame().getName());
-            original.getGame().getFieldDefsList().forEach(def -> {
+            gameName.setText(original.getGame().getCurrentInstance().getName());
+            original.getGame().getCurrentInstance().getFieldDefsList().forEach(def -> {
                 FieldController controller = addNewField();
                 controller.setFieldDef(def);
             });
@@ -209,8 +210,9 @@ public class CreateGameController {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        original = SourcedGame.wrap(savePath, game);
+        original = SourcedGame.wrap(savePath, GameTreeMerger.startingWith(game));
         RecentlyOpened.pushPath(savePath);
+        parentWindow.close();
     }
 
 }

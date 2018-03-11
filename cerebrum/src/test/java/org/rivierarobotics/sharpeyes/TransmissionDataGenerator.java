@@ -24,7 +24,12 @@
  */
 package org.rivierarobotics.sharpeyes;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
+import org.rivierarobotics.protos.CompactTeamMatch;
+import org.rivierarobotics.protos.FieldDefinition;
+import org.rivierarobotics.protos.FieldValue;
+import org.rivierarobotics.protos.Game;
+import org.rivierarobotics.sharpeyes.common.TransmissionDataWriter;
+import org.rivierarobotics.sharpeyes.data.DataProvider;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,15 +41,10 @@ import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-import org.rivierarobotics.protos.FieldDefinition;
-import org.rivierarobotics.protos.FieldValue;
-import org.rivierarobotics.protos.Game;
-import org.rivierarobotics.protos.TeamMatch;
-import org.rivierarobotics.sharpeyes.common.TransmissionDataWriter;
-import org.rivierarobotics.sharpeyes.data.transmission.TransmissionDataProvider;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 /**
- * Creates data to be used by a {@link TransmissionDataProvider}.
+ * Creates data to be used by a {@link DataProvider}.
  */
 public class TransmissionDataGenerator {
 
@@ -56,7 +56,7 @@ public class TransmissionDataGenerator {
     public static void main(String[] args) throws IOException {
         Game game = Game.parseFrom(Files.readAllBytes(GAME_REF));
         int number = getInt("Number of matches");
-        List<TeamMatch> matches = IntStream.range(0, number)
+        List<CompactTeamMatch> matches = IntStream.range(0, number)
                 .mapToObj(i -> generateMatch(game, i))
                 .collect(toImmutableList());
         new TransmissionDataWriter(matches).writeToPath(OUTPUT);
@@ -64,10 +64,10 @@ public class TransmissionDataGenerator {
 
     private static final Random RNG = new Random();
 
-    private static TeamMatch generateMatch(Game game, int matchNumber) {
-        TeamMatch.Builder matchBuilder = TeamMatch.newBuilder()
-                .setGame(game.getName())
-                .setRegional("Generated Regional")
+    private static CompactTeamMatch generateMatch(Game game, int matchNumber) {
+        CompactTeamMatch.Builder matchBuilder = CompactTeamMatch.newBuilder()
+                .setGameName(game.getName())
+                .setRegionalName("Generated Regional")
                 .setTeamNumber(getRandomTeam())
                 .setMatchNumber(matchNumber);
 
@@ -117,7 +117,7 @@ public class TransmissionDataGenerator {
 
     private static <T> T getInput(String msg, Function<String, T> converter) {
         System.out.print(msg + ": ");
-        for (;;) {
+        for (; ; ) {
             try {
                 return converter.apply(scanner.nextLine());
             } catch (RuntimeException e) {

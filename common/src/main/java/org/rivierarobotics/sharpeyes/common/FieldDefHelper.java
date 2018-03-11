@@ -24,11 +24,12 @@
  */
 package org.rivierarobotics.sharpeyes.common;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.rivierarobotics.protos.FieldDefinition;
-
-import com.google.common.collect.ImmutableList;
 
 public class FieldDefHelper {
 
@@ -39,9 +40,9 @@ public class FieldDefHelper {
     public static List<String> getChoices(FieldDefinition.Type type, List<String> choices) {
         switch (type) {
             case BOOLEAN:
-                return ImmutableList.of("false", "true");
+                return Collections.unmodifiableList(Arrays.asList("false", "true"));
             case CHOICE:
-                return ImmutableList.copyOf(choices);
+                return Collections.unmodifiableList(new ArrayList<>(choices));
             default:
                 throw new IllegalArgumentException("Not a choice-based field.");
         }

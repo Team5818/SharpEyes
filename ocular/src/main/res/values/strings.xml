@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Sharp Eyes</string>
+    <string name="app_name.expanded">S H A R P\u0020\u0020\u0020E Y E S</string>
+    <string name="icon_description">Sharp Eyes Icon</string>
+    <string name="sampletext">SAMPLETEXT</string>
+    <string name="edit_button">Edit</string>
+</resources>
