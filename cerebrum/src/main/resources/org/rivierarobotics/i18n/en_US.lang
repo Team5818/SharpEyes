@@ -1,0 +1,9 @@
+app.title=Sharp Eyes
+app.title.stylized=S H A R P   E Y E S
+app.version=1.0.0-SNAPSHOT
+
+create.game.title=Create Game
+edit.game.title=Editing %s
+
+data.provider.file.name=File System
+data.provider.qrvid.name=QR Video

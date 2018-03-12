@@ -88,6 +88,7 @@ public class FieldController {
             activeDef = activeDef.toBuilder().setType(n).build();
         });
 
+        advancedConfig.disableProperty().bind(selected.not());
         advancedConfig.setOnAction(event -> {
             AdvancedConfigController controller = new AdvancedConfigController(typeChoice.getSelectionModel().getSelectedItem());
             Parent node = Loader.loadFxml("AdvancedConfig", controller);

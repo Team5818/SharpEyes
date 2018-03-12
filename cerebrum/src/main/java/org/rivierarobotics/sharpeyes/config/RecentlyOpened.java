@@ -24,47 +24,53 @@
  */
 package org.rivierarobotics.sharpeyes.config;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.nio.file.Paths;
 import java.util.List;
 
-import com.google.common.collect.Iterables;
-import com.google.common.eventbus.EventBus;
+import com.google.common.collect.Lists;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class RecentlyOpened {
 
     private static final int MAX_RECENTS = 5;
 
-    private static final EventBus BUS = new EventBus("RecentlyOpened");
+    private static final ObservableList<Path> RECENTS = FXCollections.observableArrayList();
 
-    public static EventBus getBus() {
-        return BUS;
+    static {
+        List<String> recents = ConfigManager.loadIfNeeded().getRecentlyOpenedList();
+        RECENTS.setAll(Lists.transform(recents, Paths::get));
     }
 
-    public static final class Event {
-
-        private static final Event INSTANCE = new Event();
-
-        private Event() {
-            checkState(INSTANCE == null);
-        }
+    public static ObservableList<Path> getRecents() {
+        return RECENTS;
     }
 
     public static void pushPath(Path justOpened) {
+        popPath(justOpened);
+
+        RECENTS.add(0, justOpened);
+        while (RECENTS.size() > MAX_RECENTS) {
+            RECENTS.remove(RECENTS.size() - 1);
+        }
+        writeToConfig();
+    }
+
+    public static void popPath(Path justRemoved) {
+        while (true) {
+            if (!RECENTS.remove(justRemoved)) {
+                break;
+            }
+        }
+        writeToConfig();
+    }
+
+    private static void writeToConfig() {
+        List<String> mapped = Lists.transform(RECENTS, p -> p.toAbsolutePath().toString());
         ConfigManager.modConfig(config -> {
-            List<String> recents = new ArrayList<>(config.getRecentlyOpenedList());
-            String openedAbs = justOpened.toAbsolutePath().toString();
-            if (Iterables.getFirst(recents, "").equals(openedAbs)) {
-                return;
-            }
-            recents.add(0, openedAbs);
-            while (recents.size() > MAX_RECENTS) {
-                recents.remove(recents.size() - 1);
-            }
-            config.clearRecentlyOpened().addAllRecentlyOpened(recents);
-            BUS.post(Event.INSTANCE);
+            config.clearRecentlyOpened().addAllRecentlyOpened(mapped);
         });
     }
 }

@@ -2,27 +2,37 @@ syntax = "proto3";
 option java_package = "org.rivierarobotics.protos";
 option java_multiple_files = true;
 
+import "regionalDef.proto";
+
+message Games {
+    map<string, Game> games = 1;
+}
+
 message Game {
-	string name = 1;
-	repeated FieldDefinition fieldDefs = 2;
+    string name = 1;
+    repeated FieldDefinition fieldDefs = 2;
+    // image as JPEG
+    bytes icon = 3;
+
+    map<string, Regional> regionals = 4;
 }
 
 message FieldDefinition {
-	Type type = 1;
-	string name = 2;
-	oneof unitOneOf {
-		bool notHasUnit = 3;
-		string unit = 4;
-	}
-	enum Type {
-		INTEGER = 0;
-		FLOATING = 1;
-		BOOLEAN = 2;
-		STRING = 3;
-		CHOICE = 4;
-	}
-	/* First weight is used for multiplication case, repeat is used for choice case. */
-	repeated uint32 weights = 5;
-	/* Only non-zero if type == Type.CHOICE */
-	repeated string choices = 6;
+    Type type = 1;
+    string name = 2;
+    oneof unitOneOf {
+        bool notHasUnit = 3;
+        string unit = 4;
+    }
+    enum Type {
+        INTEGER = 0;
+        FLOATING = 1;
+        BOOLEAN = 2;
+        STRING = 3;
+        CHOICE = 4;
+    }
+    /* First weight is used for multiplication case, repeat is used for choice case. */
+    repeated uint32 weights = 5;
+    /* Only non-zero if type == Type.CHOICE */
+    repeated string choices = 6;
 }

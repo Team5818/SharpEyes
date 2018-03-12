@@ -2,20 +2,26 @@ syntax = "proto3";
 option java_package = "org.rivierarobotics.protos";
 option java_multiple_files = true;
 
+message Match {
+    uint32 matchNumber = 1;
+    map<uint32, TeamMatch> teams = 2;
+    /* Represents the 3 teams on the red alliance */
+    repeated uint32 redAlliance = 3;
+    /* Represents the 3 teams on the blue alliance */
+    repeated uint32 blueAlliance = 4;
+}
+
 message TeamMatch {
-	string game = 1;
-	string regional = 2;
-	uint32 teamNumber = 3;
-	uint32 matchNumber = 4;
-	map<string, FieldValue> values = 5;
+    uint32 teamNumber = 1;
+    map<string, FieldValue> values = 2;
 }
 
 message FieldValue {
     oneof value {
-    	sint64 integer = 1;
-    	double floating = 2;
-    	bool boole = 3;
-    	// also stores choice!
-    	string str = 4;
+        sint64 integer = 1;
+        double floating = 2;
+        bool boole = 3;
+        // also stores choice!
+        string str = 4;
     }
 }

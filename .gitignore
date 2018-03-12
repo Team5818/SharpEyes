@@ -11,3 +11,16 @@ bin/
 # custom
 generated.frtsm
 generated.gmdef
+
+# android
+*.iml
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+
+*.log

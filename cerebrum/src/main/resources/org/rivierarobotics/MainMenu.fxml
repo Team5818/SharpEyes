@@ -1,18 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.text.Font?>
 
-<MenuBar xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
-   <menus>
-      <Menu mnemonicParsing="false" text="Games">
-        <items>
-          <MenuItem fx:id="createGame" mnemonicParsing="false" text="Create Game" />
-            <MenuItem fx:id="editGame" mnemonicParsing="false" text="Edit Game..." />
-            <MenuItem fx:id="openGame" mnemonicParsing="false" text="Open Game..." />
-            <Menu fx:id="openRecentGame" mnemonicParsing="false" text="Open Recent Game" />
-        </items>
-      </Menu>
-   </menus>
-</MenuBar>
+<ToolBar xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+  <items>
+    <Button fx:id="edit" mnemonicParsing="false" text="Edit Game">
+         <graphic>
+            <Label text="" textFill="#e1b91a">
+               <font>
+                  <Font name="FontAwesome" size="20.0" />
+               </font>
+               <padding>
+                  <Insets right="5.0" />
+               </padding>
+            </Label>
+         </graphic></Button>
+      <Button fx:id="getData" mnemonicParsing="false" text="Get Data">
+         <graphic>
+            <Label text="" textFill="#3884e0">
+               <font>
+                  <Font name="FontAwesome" size="20.0" />
+               </font>
+               <padding>
+                  <Insets right="5.0" />
+               </padding>
+            </Label>
+         </graphic>
+      </Button>
+      <Button fx:id="analyze" mnemonicParsing="false" text="Analyze Data">
+         <graphic>
+            <Label text="" textFill="#3366cc">
+               <font>
+                  <Font name="FontAwesome" size="20.0" />
+               </font>
+               <padding>
+                  <Insets right="5.0" />
+               </padding>
+            </Label>
+         </graphic>
+      </Button>
+  </items>
+</ToolBar>

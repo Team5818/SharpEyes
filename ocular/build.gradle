@@ -1,0 +1,77 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url 'https://maven.google.com'
+        }
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.1.0-rc01'
+    }
+}
+
+apply plugin: 'com.android.application'
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.code.findbugs:jsr305:3.0.1'
+    }
+}
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
+    defaultConfig {
+        applicationId "org.rivierarobotics.sharpeyes"
+        minSdkVersion 26
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+    applicationVariants.all { variant ->
+        variant.resValue "string", "version", variant.versionName
+    }
+    lintOptions {
+        disable 'GradleDependency'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+repositories {
+    jcenter()
+    maven {
+        url 'https://maven.google.com'
+    }
+}
+
+dependencies {
+    def autoService = [group: 'com.google.auto.service', name: 'auto-service', version: '1.0-rc3']
+    def autoValue = [group: 'com.google.auto.value', name: 'auto-value', version: '1.5.3']
+    def autoParcel = 'com.ryanharter.auto.value:auto-value-parcel:0.2.6'
+    def aps = [autoService, autoValue, autoParcel]
+    annotationProcessor aps
+    compileOnly aps
+
+    implementation project(':common')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.android.support:design:27.0.2'
+    implementation 'com.google.guava:guava:24.0-jre'
+    testImplementation 'junit:junit:4.12'
+}

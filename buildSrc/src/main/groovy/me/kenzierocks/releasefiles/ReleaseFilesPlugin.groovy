@@ -77,7 +77,7 @@ class ReleaseFilesPlugin implements Plugin<Project> {
 
                 def infoPlistFile = Methods.copyIntoDir(srcResources.resolve("Info.plist"), appDir)
                 Methods.copyIntoDir(srcResources.resolve("icon.icns"), appResources)
-                def bootstrapScript = Methods.copyIntoDir(srcResources.resolve("vc2017-bootstrap"), appMacOs)
+                def bootstrapScript = Methods.copyIntoDir(srcResources.resolve("sharpeyes-bootstrap"), appMacOs)
 
                 // chmod 755 mcpide-bootstrap
                 Files.setPosixFilePermissions(bootstrapScript, PosixFilePermissions.fromString("rwxr-xr-x"))
@@ -183,11 +183,11 @@ class ReleaseFilesPlugin implements Plugin<Project> {
                 GitHub gitHub = GitHubBuilder
                         .fromCredentials()
                         .build()
-                def repository = gitHub.getRepository("Team5818/vision-client-2017")
+                def repository = gitHub.getRepository("Team5818/SharpEyes")
                 GHRelease rel = repository
                         .createRelease(project.version as String)
                         .name("${project.name} ${project.version}")
-                        .body("Release of vision-client-2017, version ${project.version}.")
+                        .body("Release of Sharp Eyes, version ${project.version}.")
                         .draft(true) // draft it so I can write changelogs
                         .commitish(tipCommit.id)
                         .create()

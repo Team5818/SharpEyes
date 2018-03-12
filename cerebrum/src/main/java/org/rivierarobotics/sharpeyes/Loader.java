@@ -24,13 +24,23 @@
  */
 package org.rivierarobotics.sharpeyes;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.rivierarobotics.protos.Game;
+import org.rivierarobotics.sharpeyes.controller.ControlledNode;
 
 import com.google.common.io.Resources;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
+import javafx.scene.text.Font;
 
 public class Loader {
 
@@ -47,9 +57,34 @@ public class Loader {
         }
     }
 
+    public static <C, N extends Node> ControlledNode<C, N> loadFxmlCN(String resource, C controller) {
+        N node = loadFxml(resource, controller);
+        return ControlledNode.wrap(controller, node);
+    }
+
     public static Image loadImage(String resource) {
         String normalizedName = PKG_PREFIX + resource + ".png";
         return new Image(Resources.getResource(normalizedName).toString());
+    }
+
+    public static URL getI18N(String resource) {
+        String normalizedName = PKG_PREFIX + "i18n/" + resource + ".lang";
+        return Resources.getResource(normalizedName);
+    }
+
+    public static Game getGame(Path path) {
+        Game game;
+        try (InputStream stream = new BufferedInputStream(Files.newInputStream(path))) {
+            game = Game.parseFrom(stream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return game;
+    }
+
+    public static Font loadFont(int size, String name, String ext) {
+        String normalizedName = PKG_PREFIX + "fonts/" + name + "." + ext;
+        return Font.loadFont(Resources.getResource(normalizedName).toExternalForm(), size);
     }
 
 }

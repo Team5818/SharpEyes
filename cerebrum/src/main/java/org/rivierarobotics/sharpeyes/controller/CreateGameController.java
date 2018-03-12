@@ -24,6 +24,9 @@
  */
 package org.rivierarobotics.sharpeyes.controller;
 
+import static org.rivierarobotics.sharpeyes.i18n.SharpEyesI18N.ft;
+import static org.rivierarobotics.sharpeyes.i18n.SharpEyesI18N.t;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -36,11 +39,11 @@ import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.sharpeyes.FXUtil;
 import org.rivierarobotics.sharpeyes.Loader;
 import org.rivierarobotics.sharpeyes.SharpEyes;
+import org.rivierarobotics.sharpeyes.common.GameTreeMerger;
 import org.rivierarobotics.sharpeyes.config.RecentlyOpened;
+import org.rivierarobotics.sharpeyes.data.SourcedGame;
 import org.rivierarobotics.sharpeyes.event.DeleteFieldEvent;
 
-import com.google.auto.value.AutoValue;
-import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import javafx.beans.binding.BooleanBinding;
@@ -51,42 +54,26 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Control;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 
 public class CreateGameController {
 
-    @AutoValue
-    public abstract static class CGCCloseEvent {
-
-        public static CGCCloseEvent create(CreateGameController controller) {
-            return new AutoValue_CreateGameController_CGCCloseEvent(controller);
-        }
-
-        CGCCloseEvent() {
-        }
-
-        public abstract CreateGameController controller();
-
-    }
-
-    public final EventBus bus = new EventBus("CreateGame");
-
     private final ObservableList<ObservableBooleanValue> submissionReqs = FXCollections.observableArrayList();
-    private final Window parentWindow;
+    private final Stage parentWindow = SharpEyes.applyCommonStageConfig(new Stage(), true);
 
-    private final Game original;
-    private Path originalPath;
+    private SourcedGame original;
 
     @FXML
     private Pane fields;
 
     @FXML
-    private Control addNewFieldLabelButton;
+    private Button addNewField;
 
     @FXML
     private TextField gameName;
@@ -94,14 +81,24 @@ public class CreateGameController {
     @FXML
     private Button submit;
 
-    public CreateGameController(Window parentWindow, Game original, Path originalPath) {
-        this.parentWindow = parentWindow;
-        this.original = original;
-        this.originalPath = originalPath;
+    public CreateGameController(SourcedGame game) {
+        this.original = game;
     }
 
-    public Path getOriginalPath() {
-        return originalPath;
+    public void display() {
+        Parent node = Loader.loadFxml("CreateGame", this);
+        if (original == null) {
+            parentWindow.setTitle(t("create.game.title") + " - " + t("app.title"));
+        } else {
+            parentWindow.setTitle(ft("edit.game.title", original.getGame().getCurrentInstance().getName()) + " - " + t("app.title"));
+        }
+        parentWindow.setScene(SharpEyes.addStyleSheets(new Scene(node, 800, 600)));
+        parentWindow.centerOnScreen();
+        parentWindow.show();
+    }
+
+    public SourcedGame getSourcedGame() {
+        return original;
     }
 
     public void initialize() {
@@ -110,12 +107,13 @@ public class CreateGameController {
         submit.getProperties().put("submissionReqsRef", subReqs);
         submit.disableProperty().bind(subReqs);
         submit.setOnAction(event -> onSubmit());
+        submit.setDefaultButton(true);
 
-        addNewFieldLabelButton.setOnMouseClicked(event -> addNewField());
+        addNewField.setOnAction(event -> addNewField());
 
         if (original != null) {
-            gameName.setText(original.getName());
-            original.getFieldDefsList().forEach(def -> {
+            gameName.setText(original.getGame().getCurrentInstance().getName());
+            original.getGame().getCurrentInstance().getFieldDefsList().forEach(def -> {
                 FieldController controller = addNewField();
                 controller.setFieldDef(def);
             });
@@ -196,23 +194,25 @@ public class CreateGameController {
 
         Game game = gameBuilder
                 .build();
-        Path p = originalPath;
-        if (p == null) {
+        Path savePath;
+        if (original == null) {
             File selected = saveChooser.showSaveDialog(parentWindow);
             if (selected == null) {
                 return;
             }
-            p = FXUtil.fixExtension(selected.toPath(), SharpEyes.GDEF_EXTENSION);
+            savePath = FXUtil.fixExtension(selected.toPath(), SharpEyes.GDEF_EXTENSION);
+        } else {
+            savePath = original.getSource();
         }
 
-        try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(p))) {
+        try (OutputStream stream = new BufferedOutputStream(Files.newOutputStream(savePath))) {
             game.writeTo(stream);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        originalPath = p;
-        RecentlyOpened.pushPath(originalPath);
-        bus.post(CGCCloseEvent.create(this));
+        original = SourcedGame.wrap(savePath, GameTreeMerger.startingWith(game));
+        RecentlyOpened.pushPath(savePath);
+        parentWindow.close();
     }
 
 }

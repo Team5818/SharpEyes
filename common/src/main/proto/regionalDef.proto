@@ -4,10 +4,8 @@ option java_multiple_files = true;
 
 import "matchDef.proto";
 
-message TransmitFrame {
-	oneof kind {
-		TeamMatch match = 1;
-		bool start = 2;
-		bool end = 3;
-	}
+message Regional {
+    string name = 1;
+
+    map<uint32, Match> matches = 2;
 }
