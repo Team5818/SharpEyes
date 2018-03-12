@@ -6,10 +6,14 @@
     <string name="edit_button">Edit</string>
     <string name="save">Save</string>
     <string name="x_regional">%s Regional</string>
-    <string name="match_x">Match %02d</string>
-    <string name="match_x_team_x">Match %02d - Team %02d</string>
+    <string name="match_x">Match %03d</string>
+    <string name="match_x_team_x">Match %03d - Team %04d</string>
 
-    <string name="pick.regional">Pick a regional:</string>
-    <string name="pick.match">Pick a match:</string>
-    <string name="pick.team">Pick a team:</string>
+    <string name="pick">Pick or</string>
+    <string name="pickAdd">add</string>
+    <string name="pickRegional">a regional</string>
+    <string name="pickMatch">a match</string>
+    <string name="pickTeam">a team</string>
+
+    <string name="no_permission">A permission wasn\'t granted to Sharp Eyes. Exiting!</string>
 </resources>

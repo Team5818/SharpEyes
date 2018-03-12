@@ -11,6 +11,11 @@ import org.rivierarobotics.protos.Regional;
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.adapters.InflatedGame;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -33,7 +38,8 @@ public class GameDb implements Parcelable {
     public static final Parcelable.Creator<GameDb> CREATOR = new Parcelable.Creator<GameDb>() {
         @Override
         public GameDb createFromParcel(Parcel in) {
-            GameDb db = new GameDb();
+            File root = (File) in.readSerializable();
+            GameDb db = new GameDb(SharpFiles.setup(root));
             Bundle bundle = in.readBundle(getClass().getClassLoader());
             for (String s : bundle.keySet()) {
                 db.games.put(s, bundle.getParcelable(s));
@@ -48,6 +54,11 @@ public class GameDb implements Parcelable {
     };
 
     private final Map<String, InflatedGame> games = new LinkedHashMap<>();
+    private final SharpFiles files;
+
+    public GameDb(SharpFiles files) {
+        this.files = files;
+    }
 
     public Map<String, InflatedGame> getGames() {
         return games;
@@ -61,8 +72,18 @@ public class GameDb implements Parcelable {
         Game.Builder b = getGame(selector).getBase().toBuilder();
         config.accept(b);
         InflatedGame g = InflatedGame.inflate(b.build());
+        saveGame(g);
         games.put(b.getName(), g);
         return g;
+    }
+
+    private void saveGame(InflatedGame g) {
+        File gameFile = files.getSavedGameFile(g.getName());
+        try (OutputStream stream = new FileOutputStream(gameFile)) {
+            g.getBase().writeTo(stream);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public Regional getRegional(DataSelector selector) {
@@ -128,6 +149,7 @@ public class GameDb implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeSerializable(files.getRoot());
         Bundle bundle = new Bundle();
         games.forEach(bundle::putParcelable);
         dest.writeBundle(bundle);

@@ -1,5 +1,7 @@
 package org.rivierarobotics.sharpeyes;
 
+import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,7 +19,7 @@ public class TeamMatchSelectorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_team_select);
+        DataBindingUtil.setContentView(this, R.layout.activity_team_select);
 
         matchesView = findViewById(R.id.listView);
         matchesView.setHasFixedSize(true);
@@ -38,6 +40,14 @@ public class TeamMatchSelectorActivity extends AppCompatActivity {
 
     private int getMatchNumber() {
         return adapter.getDb().getMatch(adapter.getSelector()).getMatchNumber();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GenericAdapter.REQUEST_CODE) {
+            adapter.onReloadRequest();
+        }
     }
 
 }

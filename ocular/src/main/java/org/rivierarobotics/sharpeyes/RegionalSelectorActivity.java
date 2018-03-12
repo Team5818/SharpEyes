@@ -1,5 +1,7 @@
 package org.rivierarobotics.sharpeyes;
 
+import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,7 +22,7 @@ public class RegionalSelectorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_regional_select);
+        DataBindingUtil.setContentView(this, R.layout.activity_regional_select);
 
         regionalsView = findViewById(R.id.listView);
         regionalsView.setHasFixedSize(true);
@@ -50,6 +52,14 @@ public class RegionalSelectorActivity extends AppCompatActivity {
             AndroidUtil.startActivity(view, GameEditActivity.class,
                     intent -> intent.putExtra("game", inflGame));
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == GenericAdapter.REQUEST_CODE) {
+            adapter.onReloadRequest();
+        }
     }
 
 }

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.rivierarobotics.sharpeyes">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-feature
         android:name="android.hardware.nfc"

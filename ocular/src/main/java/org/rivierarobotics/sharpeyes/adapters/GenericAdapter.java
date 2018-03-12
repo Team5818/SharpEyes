@@ -13,7 +13,6 @@ import android.widget.TextView;
 import org.rivierarobotics.sharpeyes.DataSelector;
 import org.rivierarobotics.sharpeyes.GameDb;
 import org.rivierarobotics.sharpeyes.R;
-import org.rivierarobotics.sharpeyes.RegionalSelectorActivity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,11 +73,19 @@ public class GenericAdapter<T> extends RecyclerView.Adapter<GenericAdapter.ViewH
     }
 
     public void initialize(GameDb db, DataSelector selector) {
-        dataset.clear();
         this.db = db;
         this.selector = selector;
+        reloadData();
+    }
+
+    public void reloadData() {
+        dataset.clear();
         dataset.addAll(selectData.apply(db).apply(selector));
         notifyDataSetChanged();
+    }
+
+    public void onReloadRequest() {
+        reloadData();
     }
 
     @Override
