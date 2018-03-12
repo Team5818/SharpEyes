@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;

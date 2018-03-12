@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import org.rivierarobotics.protos.FieldDefinition;
@@ -67,26 +68,26 @@ public class GameSelectorActivity extends AppCompatActivity {
 
         GameDb db = new GameDb(sharpFiles);
         DataSelector selector = DataSelector.builder().build();
-
-        db.rebuildGame(selector.selectGame("POWERUP"), g ->
-                g.addFieldDefs(FieldDefinition.newBuilder()
-                        .setName("TestString").setType(FieldDefinition.Type.STRING))
-                        .putRegionals("Ventura", Regional.newBuilder()
-                                .setName("Ventura")
-                                .putMatches(1, Match.newBuilder()
-                                        .setMatchNumber(1)
-                                        .putTeams(5818, TeamMatch.newBuilder()
-                                                .setTeamNumber(5818)
-                                                .putValues("TestString", FieldValue.newBuilder().setStr("The Value, Yes!").build())
-                                                .build())
-                                        .build())
-                                .build())
-                        .build());
-
-        db.rebuildGame(selector.selectGame("STEAMWORKS"), g -> {
-        });
-        db.rebuildGame(selector.selectGame("STRONGHOLD"), g -> {
-        });
+//
+//        db.rebuildGame(selector.selectGame("POWERUP"), g ->
+//                g.addFieldDefs(FieldDefinition.newBuilder()
+//                        .setName("TestString").setType(FieldDefinition.Type.STRING))
+//                        .putRegionals("Ventura", Regional.newBuilder()
+//                                .setName("Ventura")
+//                                .putMatches(1, Match.newBuilder()
+//                                        .setMatchNumber(1)
+//                                        .putTeams(5818, TeamMatch.newBuilder()
+//                                                .setTeamNumber(5818)
+//                                                .putValues("TestString", FieldValue.newBuilder().setStr("The Value, Yes!").build())
+//                                                .build())
+//                                        .build())
+//                                .build())
+//                        .build());
+//
+//        db.rebuildGame(selector.selectGame("STEAMWORKS"), g -> {
+//        });
+//        db.rebuildGame(selector.selectGame("STRONGHOLD"), g -> {
+//        });
 
         sharpFiles.getSavedGameFiles().stream()
                 .map(this::loadGame)
@@ -95,6 +96,16 @@ public class GameSelectorActivity extends AppCompatActivity {
                 );
 
         adapter.initialize(db, selector);
+
+
+        Button sendButton = findViewById(R.id.receiveButton);
+        sendButton.setOnClickListener(view -> {
+            AndroidUtil.startActivityForResult(this, GenericAdapter.REQUEST_CODE, GameReceiveActivity.class,
+                    intent -> {
+                        adapter.getDb().saveTo(intent);
+                        adapter.getSelector().saveTo(intent);
+                    });
+        });
     }
 
     @Override
@@ -122,7 +133,9 @@ public class GameSelectorActivity extends AppCompatActivity {
                     PERMISSIONS_STORAGE,
                     REQUEST_EXTERNAL_STORAGE
             );
+            return;
         }
+        postPermInit();
     }
 
     @Override

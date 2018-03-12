@@ -1,10 +1,17 @@
 <resources>
     <string name="app_name">Sharp Eyes</string>
     <string name="app_name.expanded">S H A R P\u0020\u0020\u0020E Y E S</string>
+
     <string name="icon_description">Sharp Eyes Icon</string>
+    <string name="bluetooth">Bluetooth Icon</string>
+
     <string name="sampletext">SAMPLETEXT</string>
+
     <string name="edit_button">Edit</string>
+    <string name="send_button">Send</string>
+    <string name="receive_button">Receive</string>
     <string name="save">Save</string>
+
     <string name="x_regional">%s Regional</string>
     <string name="match_x">Match %03d</string>
     <string name="match_x_team_x">Match %03d - Team %04d</string>
@@ -14,6 +21,7 @@
     <string name="pickRegional">a regional</string>
     <string name="pickMatch">a match</string>
     <string name="pickTeam">a team</string>
+    <string name="pickBluetooth">Pick a device to pull data from</string>
 
-    <string name="no_permission">A permission wasn\'t granted to Sharp Eyes. Exiting!</string>
+    <string name="receive_title">\??? (Receiving Game Data)</string>
 </resources>

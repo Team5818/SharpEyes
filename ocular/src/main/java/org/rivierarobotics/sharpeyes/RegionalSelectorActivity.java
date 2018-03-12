@@ -52,6 +52,15 @@ public class RegionalSelectorActivity extends AppCompatActivity {
             AndroidUtil.startActivity(view, GameEditActivity.class,
                     intent -> intent.putExtra("game", inflGame));
         });
+
+        Button sendButton = findViewById(R.id.sendButton);
+        sendButton.setOnClickListener(view -> {
+            AndroidUtil.startActivityForResult(this, GenericAdapter.REQUEST_CODE, GameSendActivity.class,
+                    intent -> {
+                        adapter.getDb().saveTo(intent);
+                        adapter.getSelector().saveTo(intent);
+                    });
+        });
     }
 
     @Override

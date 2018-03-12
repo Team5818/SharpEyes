@@ -3,4 +3,12 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#ffffff</color>
+    <color name="bluetooth">#0082fc</color>
+    <color name="bgGrey">#666</color>
+
+    <color name="status_available">#808080</color>
+    <color name="status_queued">#FF00FF</color>
+    <color name="status_fetching">#FFFF00</color>
+    <color name="status_failed">#FF0000</color>
+    <color name="status_complete">#00FF00</color>
 </resources>

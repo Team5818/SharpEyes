@@ -1,3 +1,5 @@
 <resources>
     <string name="notifications.save">Saved match data.</string>
+    <string name="no_permission">A permission wasn\'t granted to Sharp Eyes. Exiting!</string>
+    <string name="no_bluetooth">This device doesn\'t support Bluetooth. Exiting!</string>
 </resources>
