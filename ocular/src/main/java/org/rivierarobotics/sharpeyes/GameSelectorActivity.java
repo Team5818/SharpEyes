@@ -37,7 +37,7 @@ public class GameSelectorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_select);
 
-        gamesView = findViewById(R.id.games);
+        gamesView = findViewById(R.id.listView);
         gamesView.setHasFixedSize(true);
         gamesView.setLayoutManager(new LinearLayoutManager(this));
         gamesView.setAdapter(adapter = new GenericAdapter<>(
