@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.rivierarobotics.sharpeyes.DataSelector;
+import org.rivierarobotics.sharpeyes.GameDb;
 import org.rivierarobotics.sharpeyes.R;
 import org.rivierarobotics.sharpeyes.RegionalSelectorActivity;
 
@@ -38,15 +39,16 @@ public class GenericAdapter<T> extends RecyclerView.Adapter<GenericAdapter.ViewH
 
     private final List<T> dataset = new ArrayList<>();
     private final Activity activity;
-    private final Function<DataSelector, Collection<T>> selectData;
+    private final Function<GameDb, Function<DataSelector, Collection<T>>> selectData;
     private final Function<T, String> getName;
     private final Function<T, Bitmap> getIcon;
     private final BiFunction<T, DataSelector, DataSelector> onSelection;
     private final Class<?> activityClass;
+    private GameDb db;
     private DataSelector selector;
 
     public GenericAdapter(Activity activity,
-                          Function<DataSelector, Collection<T>> selectData,
+                          Function<GameDb, Function<DataSelector, Collection<T>>> selectData,
                           Function<T, String> getName,
                           Function<T, Bitmap> getIcon,
                           BiFunction<T, DataSelector, DataSelector> onSelection,
@@ -59,10 +61,23 @@ public class GenericAdapter<T> extends RecyclerView.Adapter<GenericAdapter.ViewH
         this.activityClass = activityClass;
     }
 
-    public void initialize(DataSelector selector) {
+    public GameDb getDb() {
+        return db;
+    }
+
+    public DataSelector getSelector() {
+        return selector;
+    }
+
+    public void initialize(Intent intent) {
+        initialize(GameDb.loadFrom(intent), DataSelector.loadFrom(intent));
+    }
+
+    public void initialize(GameDb db, DataSelector selector) {
         dataset.clear();
+        this.db = db;
         this.selector = selector;
-        dataset.addAll(selectData.apply(selector));
+        dataset.addAll(selectData.apply(db).apply(selector));
         notifyDataSetChanged();
     }
 
@@ -84,6 +99,7 @@ public class GenericAdapter<T> extends RecyclerView.Adapter<GenericAdapter.ViewH
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(activity, activityClass);
             onSelection.apply(item, selector).saveTo(intent);
+            db.saveTo(intent);
             activity.startActivityForResult(intent, REQUEST_CODE);
         });
     }

@@ -36,6 +36,9 @@
             android:name=".MatchSelectorActivity"
             android:theme="@style/AppTheme" />
         <activity
+            android:name=".TeamMatchSelectorActivity"
+            android:theme="@style/AppTheme" />
+        <activity
             android:name=".MatchLayoutEditActivity"
             android:theme="@style/AppTheme" />
         <activity

@@ -5,6 +5,10 @@ option java_multiple_files = true;
 message Match {
     uint32 matchNumber = 1;
     map<uint32, TeamMatch> teams = 2;
+    /* Represents the 3 teams on the red alliance */
+    repeated uint32 redAlliance = 3;
+    /* Represents the 3 teams on the blue alliance */
+    repeated uint32 blueAlliance = 4;
 }
 
 message TeamMatch {

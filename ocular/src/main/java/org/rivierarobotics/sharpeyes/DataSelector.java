@@ -4,14 +4,6 @@ import android.content.Intent;
 import android.os.Parcelable;
 
 import com.google.auto.value.AutoValue;
-import com.google.auto.value.extension.memoized.Memoized;
-
-import org.rivierarobotics.protos.Game;
-import org.rivierarobotics.protos.Games;
-import org.rivierarobotics.protos.Match;
-import org.rivierarobotics.protos.Regional;
-import org.rivierarobotics.protos.TeamMatch;
-import org.rivierarobotics.sharpeyes.adapters.InflatedGame;
 
 import javax.annotation.Nullable;
 
@@ -27,7 +19,7 @@ public abstract class DataSelector implements Parcelable {
     private static final String EXTRA_KEY = "rrDataSelector";
 
     public static DataSelector loadFrom(Intent intent) {
-        return intent.getParcelableExtra(EXTRA_KEY);
+        return checkNotNull(intent.getParcelableExtra(EXTRA_KEY));
     }
 
     public void saveTo(Intent intent) {
@@ -40,8 +32,6 @@ public abstract class DataSelector implements Parcelable {
 
     @AutoValue.Builder
     public abstract static class Builder {
-
-        public abstract Builder games(Games games);
 
         public abstract Builder gameId(@Nullable String gameId);
 
@@ -79,8 +69,6 @@ public abstract class DataSelector implements Parcelable {
     DataSelector() {
     }
 
-    abstract Games games();
-
     @Nullable
     public abstract String gameId();
 
@@ -93,39 +81,12 @@ public abstract class DataSelector implements Parcelable {
     @Nullable
     public abstract Integer teamNumber();
 
-    @Memoized
-    public InflatedGame game() {
-        String gameId = gameId();
-        checkNotNull(gameId);
-        Game game = games().getGamesOrThrow(gameId);
-        return InflatedGame.inflate(game);
-    }
-
-    @Memoized
-    public Regional regional() {
-        String regId = regionalId();
-        checkNotNull(regId);
-        return game().getBase().getRegionalsOrThrow(regId);
-    }
-
-    @Memoized
-    public Match match() {
-        Integer matchNumber = matchNumber();
-        checkNotNull(matchNumber);
-        return regional().getMatchesOrThrow(matchNumber);
-    }
-
-    @Memoized
-    public TeamMatch teamMatch() {
-        Integer teamNumber = teamNumber();
-        checkNotNull(teamNumber);
-        return match().getTeamsOrThrow(teamNumber);
-    }
-
     abstract Builder toBuilder();
 
     public DataSelector selectGame(String game) {
-        return toBuilder().gameId(game).build();
+        return toBuilder()
+                .gameId(game)
+                .build();
     }
 
 

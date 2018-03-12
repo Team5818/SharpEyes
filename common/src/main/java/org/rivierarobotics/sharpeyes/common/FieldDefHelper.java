@@ -30,8 +30,33 @@ import java.util.Collections;
 import java.util.List;
 
 import org.rivierarobotics.protos.FieldDefinition;
+import org.rivierarobotics.protos.FieldValue;
 
 public class FieldDefHelper {
+
+    public static FieldValue defaultFieldValue(FieldDefinition definition) {
+        FieldValue.Builder builder = FieldValue.newBuilder();
+        switch (definition.getType()) {
+            case INTEGER:
+                builder.setInteger(0L);
+                break;
+            case FLOATING:
+                builder.setFloating(0.0f);
+                break;
+            case BOOLEAN:
+                builder.setBoole(false);
+                break;
+            case STRING:
+                builder.setStr("");
+                break;
+            case CHOICE:
+                builder.setStr(definition.getChoices(0));
+                break;
+            default:
+                throw new IllegalStateException("Unknown field def type: " + definition.getType().name());
+        }
+        return builder.build();
+    }
 
     public static List<String> getChoices(FieldDefinition def) {
         return getChoices(def.getType(), def.getChoicesList());

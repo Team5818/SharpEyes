@@ -14,7 +14,6 @@ import android.util.Log;
 import org.rivierarobotics.protos.FieldDefinition;
 import org.rivierarobotics.protos.FieldValue;
 import org.rivierarobotics.protos.Game;
-import org.rivierarobotics.protos.Games;
 import org.rivierarobotics.protos.Match;
 import org.rivierarobotics.protos.Regional;
 import org.rivierarobotics.protos.TeamMatch;
@@ -26,9 +25,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.stream.Collector;
-
-import static java.util.stream.Collectors.toList;
 
 public class GameSelectorActivity extends AppCompatActivity {
 
@@ -39,14 +35,14 @@ public class GameSelectorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_game_select);
 
         gamesView = findViewById(R.id.games);
         gamesView.setHasFixedSize(true);
         gamesView.setLayoutManager(new LinearLayoutManager(this));
         gamesView.setAdapter(adapter = new GenericAdapter<>(
                 this,
-                selector -> selector.games().getGamesMap().values().stream().map(InflatedGame::inflate).collect(toList()),
+                db -> s -> db.getGames().values(),
                 InflatedGame::getName,
                 InflatedGame::getIcon,
                 (inflatedGame, selector) -> selector.selectGame(inflatedGame.getName()),
@@ -55,38 +51,36 @@ public class GameSelectorActivity extends AppCompatActivity {
 
         sharpFiles = SharpFiles.setup(this);
 
-        Games games = sharpFiles.getSavedGameFiles().stream()
-                .map(this::loadGame)
-                .collect(Collector.of(
-                        Games::newBuilder,
-                        (b, g) -> b.putGames(g.getName(), g),
-                        (a, b) -> a.mergeFrom(b.buildPartial()),
-                        Games.Builder::build
-                ));
+        GameDb db = new GameDb();
+        DataSelector selector = DataSelector.builder().build();
 
-        games = games.toBuilder().putGames("POWERUP", Game.newBuilder()
-                .setName("POWERUP")
-                .addFieldDefs(FieldDefinition.newBuilder()
+        db.rebuildGame(selector.selectGame("POWERUP"), g ->
+                g.addFieldDefs(FieldDefinition.newBuilder()
                         .setName("TestString").setType(FieldDefinition.Type.STRING))
-                .putRegionals("Ventura", Regional.newBuilder()
-                        .setName("Ventura")
-                        .putMatches(1, Match.newBuilder()
-                                .setMatchNumber(1)
-                                .putTeams(5818, TeamMatch.newBuilder()
-                                        .setTeamNumber(5818)
-                                        .putValues("TestString", FieldValue.newBuilder().setStr("The Value, Yes!").build())
+                        .putRegionals("Ventura", Regional.newBuilder()
+                                .setName("Ventura")
+                                .putMatches(1, Match.newBuilder()
+                                        .setMatchNumber(1)
+                                        .putTeams(5818, TeamMatch.newBuilder()
+                                                .setTeamNumber(5818)
+                                                .putValues("TestString", FieldValue.newBuilder().setStr("The Value, Yes!").build())
+                                                .build())
                                         .build())
                                 .build())
-                        .build())
-                .build()).build();
-        games = games.toBuilder().putGames("STEAMWORKS", Game.newBuilder()
-                .setName("STEAMWORKS")
-                .build()).build();
-        games = games.toBuilder().putGames("STRONGHOLD", Game.newBuilder()
-                .setName("STRONGHOLD")
-                .build()).build();
+                        .build());
 
-        adapter.initialize(DataSelector.builder().games(games).build());
+        db.rebuildGame(selector.selectGame("STEAMWORKS"), g -> {
+        });
+        db.rebuildGame(selector.selectGame("STRONGHOLD"), g -> {
+        });
+
+        sharpFiles.getSavedGameFiles().stream()
+                .map(this::loadGame)
+                .forEach(g ->
+                        db.rebuildGame(selector.selectGame(g.getName()), b -> b.mergeFrom(g))
+                );
+
+        adapter.initialize(db, selector);
     }
 
     @Override

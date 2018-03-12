@@ -17,7 +17,7 @@ public class MatchLayoutEditActivity extends AppCompatActivity implements Surfac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_match);
+        setContentView(R.layout.activity_match_layout_edit);
 
         uxArea = findViewById(R.id.ux_area);
 

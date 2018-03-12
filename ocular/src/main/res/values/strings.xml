@@ -4,4 +4,12 @@
     <string name="icon_description">Sharp Eyes Icon</string>
     <string name="sampletext">SAMPLETEXT</string>
     <string name="edit_button">Edit</string>
+    <string name="save">Save</string>
+    <string name="x_regional">%s Regional</string>
+    <string name="match_x">Match %02d</string>
+    <string name="match_x_team_x">Match %02d - Team %02d</string>
+
+    <string name="pick.regional">Pick a regional:</string>
+    <string name="pick.match">Pick a match:</string>
+    <string name="pick.team">Pick a team:</string>
 </resources>

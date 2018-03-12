@@ -20,22 +20,23 @@ public class RegionalSelectorActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_game);
+        setContentView(R.layout.activity_regional_select);
 
         regionalsView = findViewById(R.id.listView);
         regionalsView.setHasFixedSize(true);
         regionalsView.setLayoutManager(new LinearLayoutManager(this));
         regionalsView.setAdapter(adapter = new GenericAdapter<>(
                 this,
-                selector -> selector.game().getBase().getRegionalsMap().values(),
+                db -> s -> db.getGame(s).getBase().getRegionalsMap().values(),
                 Regional::getName,
                 x -> null,
                 (regional, selector) -> selector.selectRegional(regional.getName()),
                 MatchSelectorActivity.class
         ));
 
-        DataSelector selector = DataSelector.loadFrom(getIntent());
-        InflatedGame inflGame = selector.game();
+        adapter.initialize(getIntent());
+
+        InflatedGame inflGame = adapter.getDb().getGame(adapter.getSelector());
 
         ImageView image = findViewById(R.id.icon);
         if (inflGame.getIcon() != null) {
@@ -43,7 +44,6 @@ public class RegionalSelectorActivity extends AppCompatActivity {
         }
         TextView title = findViewById(R.id.title);
         title.setText(inflGame.getName());
-        adapter.initialize(selector);
 
         Button editButton = findViewById(R.id.editButton);
         editButton.setOnClickListener(view -> {
