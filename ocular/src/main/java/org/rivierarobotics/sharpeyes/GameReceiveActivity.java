@@ -20,10 +20,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.sharpeyes.adapters.ReceiveDeviceAdapter;
+import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -39,7 +39,7 @@ public class GameReceiveActivity extends AppCompatActivity {
 
     private ReceiveDeviceAdapter adapter = new ReceiveDeviceAdapter(this);
     private RecyclerView deviceView;
-    private GameDb db;
+    private GameDbAccess db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +51,7 @@ public class GameReceiveActivity extends AppCompatActivity {
         deviceView.setLayoutManager(new LinearLayoutManager(this));
         deviceView.setAdapter(adapter);
 
-        db = GameDb.loadFrom(getIntent());
+        db = GameDbAccess.getInstance();
         TextView title = findViewById(R.id.title);
         title.setText(R.string.receive_title);
 
@@ -121,7 +121,10 @@ public class GameReceiveActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(receiveDeviceFindAction);
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter != null && adapter.isEnabled()) {
+            unregisterReceiver(receiveDeviceFindAction);
+        }
     }
 
     private void addItemIfMatches(BluetoothDevice device) {

@@ -24,4 +24,11 @@
     <string name="pickBluetooth">Pick a device to pull data from</string>
 
     <string name="receive_title">\??? (Receiving Game Data)</string>
+
+    <string name="newRegional">New Regional</string>
+    <string name="newMatch">New Match</string>
+    <string name="newTeam">New Team</string>
+    <string name="enterName">Enter name:</string>
+    <string name="enterNumber">Enter number:</string>
+    <string name="create">Create</string>
 </resources>

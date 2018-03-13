@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.sharpeyes.adapters.InflatedGame;
+import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class GameSendActivity extends AppCompatActivity {
 
         wrapper = findViewById(R.id.blueIconWrapper);
 
-        GameDb db = GameDb.loadFrom(getIntent());
+        GameDbAccess db = GameDbAccess.getInstance();
         DataSelector selector = DataSelector.loadFrom(getIntent());
         TextView title = findViewById(R.id.title);
         InflatedGame game = db.getGame(selector);

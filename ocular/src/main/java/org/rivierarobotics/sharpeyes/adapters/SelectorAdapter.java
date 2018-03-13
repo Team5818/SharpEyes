@@ -7,21 +7,25 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.rivierarobotics.sharpeyes.DataSelector;
-import org.rivierarobotics.sharpeyes.GameDb;
+import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 import org.rivierarobotics.sharpeyes.R;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 
-public class GenericAdapter<T> extends RecyclerView.Adapter<GenericAdapter.ViewHolder> {
+public class SelectorAdapter<T> extends RecyclerView.Adapter<SelectorAdapter.ViewHolder> {
 
     public static final int REQUEST_CODE = 0xF001;
 
@@ -36,31 +40,43 @@ public class GenericAdapter<T> extends RecyclerView.Adapter<GenericAdapter.ViewH
         }
     }
 
+    public interface AddSelectionCallback {
+
+        void add(DataSelector selector);
+
+    }
+
     private final List<T> dataset = new ArrayList<>();
     private final Activity activity;
-    private final Function<GameDb, Function<DataSelector, Collection<T>>> selectData;
+    private final Comparator<T> comparator;
+    private final Function<GameDbAccess, Function<DataSelector, Collection<T>>> selectData;
     private final Function<T, String> getName;
     private final Function<T, Bitmap> getIcon;
     private final BiFunction<T, DataSelector, DataSelector> onSelection;
+    private final AddSelectionCallback selectionCb;
     private final Class<?> activityClass;
-    private GameDb db;
+    private GameDbAccess db;
     private DataSelector selector;
 
-    public GenericAdapter(Activity activity,
-                          Function<GameDb, Function<DataSelector, Collection<T>>> selectData,
-                          Function<T, String> getName,
-                          Function<T, Bitmap> getIcon,
-                          BiFunction<T, DataSelector, DataSelector> onSelection,
-                          Class<?> activityClass) {
+    public SelectorAdapter(Activity activity,
+                           Comparator<T> comparator,
+                           Function<GameDbAccess, Function<DataSelector, Collection<T>>> selectData,
+                           Function<T, String> getName,
+                           Function<T, Bitmap> getIcon,
+                           BiFunction<T, DataSelector, DataSelector> onSelection,
+                           AddSelectionCallback selectionCb,
+                           Class<?> activityClass) {
         this.activity = activity;
+        this.comparator = comparator;
         this.selectData = selectData;
         this.getName = getName;
         this.getIcon = getIcon;
         this.onSelection = onSelection;
+        this.selectionCb = selectionCb;
         this.activityClass = activityClass;
     }
 
-    public GameDb getDb() {
+    public GameDbAccess getDb() {
         return db;
     }
 
@@ -69,18 +85,31 @@ public class GenericAdapter<T> extends RecyclerView.Adapter<GenericAdapter.ViewH
     }
 
     public void initialize(Intent intent) {
-        initialize(GameDb.loadFrom(intent), DataSelector.loadFrom(intent));
+        initialize(GameDbAccess.getInstance(), DataSelector.loadFrom(intent));
     }
 
-    public void initialize(GameDb db, DataSelector selector) {
+    public void initialize(GameDbAccess db, DataSelector selector) {
         this.db = db;
         this.selector = selector;
         reloadData();
+        hookAdd();
+    }
+
+    private void hookAdd() {
+        Button add = activity.findViewById(R.id.pickAdd);
+        if (add == null || selectionCb == null) {
+            return;
+        }
+        add.setOnClickListener(view -> {
+            selectionCb.add(selector);
+            reloadData();
+        });
     }
 
     public void reloadData() {
         dataset.clear();
         dataset.addAll(selectData.apply(db).apply(selector));
+        dataset.sort(comparator);
         notifyDataSetChanged();
     }
 
@@ -106,7 +135,6 @@ public class GenericAdapter<T> extends RecyclerView.Adapter<GenericAdapter.ViewH
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(activity, activityClass);
             onSelection.apply(item, selector).saveTo(intent);
-            db.saveTo(intent);
             activity.startActivityForResult(intent, REQUEST_CODE);
         });
     }

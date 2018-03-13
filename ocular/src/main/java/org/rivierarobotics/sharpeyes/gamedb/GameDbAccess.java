@@ -1,14 +1,15 @@
-package org.rivierarobotics.sharpeyes;
+package org.rivierarobotics.sharpeyes.gamedb;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.util.Log;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.protos.Match;
 import org.rivierarobotics.protos.Regional;
 import org.rivierarobotics.protos.TeamMatch;
+import org.rivierarobotics.sharpeyes.DataSelector;
+import org.rivierarobotics.sharpeyes.SharpFiles;
 import org.rivierarobotics.sharpeyes.adapters.InflatedGame;
 
 import java.io.File;
@@ -16,48 +17,41 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class GameDb implements Parcelable {
+public class GameDbAccess {
 
-    private static final String EXTRA_KEY = "rrGameDb";
+    private static GameDbAccess instance;
 
-    public static GameDb loadFrom(Intent intent) {
-        return checkNotNull(intent.getParcelableExtra(EXTRA_KEY));
+    public static void initialize(SharpFiles files, GameDbDao dao) {
+        instance = new GameDbAccess(files, dao);
     }
 
-    public void saveTo(Intent intent) {
-        intent.putExtra(EXTRA_KEY, this);
+    public static GameDbAccess getInstance() {
+        checkNotNull(instance, "Un-initialized!");
+        return instance;
     }
 
-    public static final Parcelable.Creator<GameDb> CREATOR = new Parcelable.Creator<GameDb>() {
-        @Override
-        public GameDb createFromParcel(Parcel in) {
-            File root = (File) in.readSerializable();
-            GameDb db = new GameDb(SharpFiles.setup(root));
-            Bundle bundle = in.readBundle(getClass().getClassLoader());
-            for (String s : bundle.keySet()) {
-                db.games.put(s, bundle.getParcelable(s));
-            }
-            return db;
-        }
-
-        @Override
-        public GameDb[] newArray(int size) {
-            return new GameDb[size];
-        }
-    };
-
-    private final Map<String, InflatedGame> games = new LinkedHashMap<>();
+    private final ExecutorService dbAccess = Executors.newCachedThreadPool(
+            new ThreadFactoryBuilder()
+                    .setNameFormat("db-access-%d")
+                    .build()
+    );
+    private final Map<String, InflatedGame> games = Collections.synchronizedMap(new LinkedHashMap<>());
     private final SharpFiles files;
+    private final GameDbDao dao;
 
-    public GameDb(SharpFiles files) {
+    private GameDbAccess(SharpFiles files, GameDbDao dao) {
         this.files = files;
+        this.dao = dao;
     }
 
     public Map<String, InflatedGame> getGames() {
@@ -68,9 +62,9 @@ public class GameDb implements Parcelable {
         return games.computeIfAbsent(selector.gameId(), gid -> InflatedGame.inflate(Game.newBuilder().setName(gid).build()));
     }
 
-    public InflatedGame rebuildGame(DataSelector selector, Consumer<Game.Builder> config) {
+    public InflatedGame rebuildGame(DataSelector selector, UnaryOperator<Game.Builder> config) {
         Game.Builder b = getGame(selector).getBase().toBuilder();
-        config.accept(b);
+        b = config.apply(b);
         InflatedGame g = InflatedGame.inflate(b.build());
         saveGame(g);
         games.put(b.getName(), g);
@@ -78,11 +72,14 @@ public class GameDb implements Parcelable {
     }
 
     private void saveGame(InflatedGame g) {
+        Log.d("GameDbAccess", "Saving game: " + g.getName());
+        dbAccess.submit(() -> dao.insert(g.getBase()));
         File gameFile = files.getSavedGameFile(g.getName());
         try (OutputStream stream = new FileOutputStream(gameFile)) {
             g.getBase().writeTo(stream);
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            Log.e("GameDbAccess", "Error saving game", e);
+            return;
         }
     }
 
@@ -96,9 +93,9 @@ public class GameDb implements Parcelable {
         return regional;
     }
 
-    public Regional rebuildRegional(DataSelector selector, Consumer<Regional.Builder> config) {
+    public Regional rebuildRegional(DataSelector selector, UnaryOperator<Regional.Builder> config) {
         Regional.Builder b = getRegional(selector).toBuilder();
-        config.accept(b);
+        b = config.apply(b);
         Regional r = b.build();
         rebuildGame(selector, g -> g.putRegionals(r.getName(), r));
         return r;
@@ -115,9 +112,9 @@ public class GameDb implements Parcelable {
         return match;
     }
 
-    public Match rebuildMatch(DataSelector selector, Consumer<Match.Builder> config) {
+    public Match rebuildMatch(DataSelector selector, UnaryOperator<Match.Builder> config) {
         Match.Builder b = getMatch(selector).toBuilder();
-        config.accept(b);
+        b = config.apply(b);
         Match m = b.build();
         rebuildRegional(selector, r -> r.putMatches(m.getMatchNumber(), m));
         return m;
@@ -134,24 +131,11 @@ public class GameDb implements Parcelable {
         return teamMatch;
     }
 
-    public TeamMatch rebuildTeamMatch(DataSelector selector, Consumer<TeamMatch.Builder> config) {
+    public TeamMatch rebuildTeamMatch(DataSelector selector, UnaryOperator<TeamMatch.Builder> config) {
         TeamMatch.Builder b = getTeamMatch(selector).toBuilder();
-        config.accept(b);
+        b = config.apply(b);
         TeamMatch tm = b.build();
         rebuildMatch(selector, t -> t.putTeams(tm.getTeamNumber(), tm));
         return tm;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeSerializable(files.getRoot());
-        Bundle bundle = new Bundle();
-        games.forEach(bundle::putParcelable);
-        dest.writeBundle(bundle);
     }
 }

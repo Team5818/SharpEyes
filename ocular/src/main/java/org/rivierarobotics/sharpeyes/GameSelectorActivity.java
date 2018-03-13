@@ -1,7 +1,6 @@
 package org.rivierarobotics.sharpeyes;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
@@ -19,27 +18,25 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
-import org.rivierarobotics.protos.FieldDefinition;
-import org.rivierarobotics.protos.FieldValue;
 import org.rivierarobotics.protos.Game;
-import org.rivierarobotics.protos.Match;
-import org.rivierarobotics.protos.Regional;
-import org.rivierarobotics.protos.TeamMatch;
-import org.rivierarobotics.sharpeyes.adapters.GenericAdapter;
+import org.rivierarobotics.sharpeyes.adapters.SelectorAdapter;
 import org.rivierarobotics.sharpeyes.adapters.InflatedGame;
+import org.rivierarobotics.sharpeyes.gamedb.GameDb;
+import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Comparator;
 
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
 public class GameSelectorActivity extends AppCompatActivity {
 
     private SharpFiles sharpFiles;
-    private GenericAdapter<InflatedGame> adapter;
+    private SelectorAdapter<InflatedGame> adapter;
     private RecyclerView gamesView;
 
     @Override
@@ -50,14 +47,18 @@ public class GameSelectorActivity extends AppCompatActivity {
         gamesView = findViewById(R.id.listView);
         gamesView.setHasFixedSize(true);
         gamesView.setLayoutManager(new LinearLayoutManager(this));
-        gamesView.setAdapter(adapter = new GenericAdapter<>(
+        gamesView.setAdapter(adapter = new SelectorAdapter<>(
                 this,
+                Comparator.comparing(InflatedGame::getName),
                 db -> s -> db.getGames().values(),
                 InflatedGame::getName,
                 InflatedGame::getIcon,
                 (inflatedGame, selector) -> selector.selectGame(inflatedGame.getName()),
+                null,
                 RegionalSelectorActivity.class
         ));
+
+        GameDb.initialize(getApplicationContext());
 
         verifyStoragePermissions();
 
@@ -66,7 +67,8 @@ public class GameSelectorActivity extends AppCompatActivity {
     private void postPermInit() {
         sharpFiles = SharpFiles.setup(this);
 
-        GameDb db = new GameDb(sharpFiles);
+        GameDbAccess.initialize(sharpFiles, GameDb.getInstance().getDao());
+        GameDbAccess db = GameDbAccess.getInstance();
         DataSelector selector = DataSelector.builder().build();
 //
 //        db.rebuildGame(selector.selectGame("POWERUP"), g ->
@@ -92,17 +94,30 @@ public class GameSelectorActivity extends AppCompatActivity {
         sharpFiles.getSavedGameFiles().stream()
                 .map(this::loadGame)
                 .forEach(g ->
-                        db.rebuildGame(selector.selectGame(g.getName()), b -> b.mergeFrom(g))
+                        db.getGames().put(g.getName(), InflatedGame.inflate(g))
                 );
+
+        Thread task = new Thread(() -> {
+            GameDb.getInstance().getDao().getAll()
+                    .forEach(g ->
+                            db.rebuildGame(selector.selectGame(g.getName()), b -> {
+                                if (g.getGame() != null) {
+                                    return g.getGame().toBuilder();
+                                }
+                                return b;
+                            })
+                    );
+            runOnUiThread(adapter::onReloadRequest);
+        }, "db-task");
+        task.start();
 
         adapter.initialize(db, selector);
 
 
         Button sendButton = findViewById(R.id.receiveButton);
         sendButton.setOnClickListener(view -> {
-            AndroidUtil.startActivityForResult(this, GenericAdapter.REQUEST_CODE, GameReceiveActivity.class,
+            AndroidUtil.startActivityForResult(this, SelectorAdapter.REQUEST_CODE, GameReceiveActivity.class,
                     intent -> {
-                        adapter.getDb().saveTo(intent);
                         adapter.getSelector().saveTo(intent);
                     });
         });
@@ -111,7 +126,7 @@ public class GameSelectorActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == GenericAdapter.REQUEST_CODE) {
+        if (requestCode == SelectorAdapter.REQUEST_CODE) {
             adapter.onReloadRequest();
         }
     }

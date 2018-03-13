@@ -3,6 +3,7 @@ package org.rivierarobotics.sharpeyes.adapters;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,7 @@ import org.rivierarobotics.protos.FieldDefinition;
 import org.rivierarobotics.protos.FieldValue;
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.DataSelector;
-import org.rivierarobotics.sharpeyes.GameDb;
+import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 import org.rivierarobotics.sharpeyes.R;
 import org.rivierarobotics.sharpeyes.common.FieldDefHelper;
 
@@ -50,6 +51,7 @@ public class MatchFieldAdapter extends RecyclerView.Adapter<MatchFieldAdapter.Vi
 
         @Override
         public void bind(FieldDefinition def, FieldValue value) {
+            Log.d("MFA", "binding data " + value);
             switch (def.getType()) {
                 case INTEGER:
                     textbox.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
@@ -133,13 +135,13 @@ public class MatchFieldAdapter extends RecyclerView.Adapter<MatchFieldAdapter.Vi
     }
 
     private final List<FieldDefinition> fieldDefs = new ArrayList<>();
-    private GameDb db;
+    private GameDbAccess db;
     private DataSelector selector;
 
     public void initialize(Intent intent) {
         fieldDefs.clear();
 
-        db = GameDb.loadFrom(intent);
+        db = GameDbAccess.getInstance();
         selector = DataSelector.loadFrom(intent);
 
         Map<String, FieldValue> vals = new HashMap<>(db.getTeamMatch(selector).getValuesMap());
@@ -155,7 +157,7 @@ public class MatchFieldAdapter extends RecyclerView.Adapter<MatchFieldAdapter.Vi
         notifyDataSetChanged();
     }
 
-    public GameDb getDb() {
+    public GameDbAccess getDb() {
         return db;
     }
 
@@ -165,11 +167,17 @@ public class MatchFieldAdapter extends RecyclerView.Adapter<MatchFieldAdapter.Vi
 
     public void saveData(RecyclerView view) {
         db.rebuildTeamMatch(selector, tm -> {
+            tm.clearValues();
             for (int i = 0; i < fieldDefs.size(); i++) {
                 FieldDefinition fd = fieldDefs.get(i);
                 ViewHolder holder = (ViewHolder) view.findViewHolderForAdapterPosition(i);
+                if (holder == null) {
+                    continue;
+                }
+                Log.d("MatchSave", "Saving value " + fd.getName() + ": " + holder.saveValue(fd));
                 tm.putValues(fd.getName(), holder.saveValue(fd));
             }
+            return tm;
         });
     }
 
