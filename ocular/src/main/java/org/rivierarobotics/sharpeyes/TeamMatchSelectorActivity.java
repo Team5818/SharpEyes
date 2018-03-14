@@ -9,12 +9,11 @@ import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.widget.TextView;
 
-import org.rivierarobotics.protos.Match;
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.adapters.SelectorAdapter;
 import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
-import java.util.Comparator;
+import static org.rivierarobotics.sharpeyes.Functional.comparingInt;
 
 public class TeamMatchSelectorActivity extends AppCompatActivity implements NameDialogFragment.NDFCallback {
 
@@ -34,7 +33,7 @@ public class TeamMatchSelectorActivity extends AppCompatActivity implements Name
         matchesView.setLayoutManager(new LinearLayoutManager(this));
         matchesView.setAdapter(adapter = new SelectorAdapter<>(
                 this,
-                Comparator.comparingInt(TeamMatch::getTeamNumber),
+                comparingInt(TeamMatch::getTeamNumber),
                 db -> s -> db.getMatch(s).getTeamsMap().values(),
                 t -> getString(R.string.match_x_team_x, getMatchNumber(), t.getTeamNumber()),
                 t -> null,

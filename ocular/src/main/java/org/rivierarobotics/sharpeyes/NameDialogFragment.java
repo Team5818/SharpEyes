@@ -5,9 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 
 public class NameDialogFragment extends DialogFragment {
@@ -35,7 +33,7 @@ public class NameDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
         dialog.setTitle(getArguments().getString(ARG_TITLE));
         dialog.setMessage(getArguments().getString(ARG_MESSAGE));
         dialog.setNegativeButton(android.R.string.cancel, null);

@@ -1,6 +1,6 @@
 package org.rivierarobotics.sharpeyes.uxdrag;
 
-import java.util.Optional;
+import com.google.common.base.Optional;
 
 /**
  * UX Drag controller. Feed this drag-and-drop events.

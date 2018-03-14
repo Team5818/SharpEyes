@@ -1,10 +1,14 @@
 package org.rivierarobotics.sharpeyes.adapters;
 
 import android.app.Activity;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.google.common.collect.Iterables;
 
 import org.rivierarobotics.sharpeyes.R;
 
@@ -48,6 +52,9 @@ public class ReceiveDeviceAdapter extends RecyclerView.Adapter<ReceiveDeviceAdap
 
     public int addItem(Item item) {
         int index = dataset.size();
+        if (Iterables.any(dataset, i -> i.name.equals(item.name))) {
+            return -1;
+        }
         dataset.add(item);
         notifyItemInserted(index);
         return index;
@@ -60,7 +67,8 @@ public class ReceiveDeviceAdapter extends RecyclerView.Adapter<ReceiveDeviceAdap
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(new TextView(parent.getContext()));
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.text_item, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
@@ -76,17 +84,17 @@ public class ReceiveDeviceAdapter extends RecyclerView.Adapter<ReceiveDeviceAdap
     private int statusColor(Item.Status status) {
         switch (status) {
             case AVAILABLE:
-                return activity.getColor(R.color.status_available);
+                return ContextCompat.getColor(activity, R.color.status_available);
             case QUEUED:
-                return activity.getColor(R.color.status_queued);
+                return ContextCompat.getColor(activity, R.color.status_queued);
             case FETCHING:
-                return activity.getColor(R.color.status_fetching);
+                return ContextCompat.getColor(activity, R.color.status_fetching);
             case FAILED:
-                return activity.getColor(R.color.status_failed);
+                return ContextCompat.getColor(activity, R.color.status_failed);
             case COMPLETE:
-                return activity.getColor(R.color.status_complete);
+                return ContextCompat.getColor(activity, R.color.status_complete);
         }
-        return activity.getColor(R.color.bluetooth);
+        return ContextCompat.getColor(activity, R.color.bluetooth);
     }
 
     @Override

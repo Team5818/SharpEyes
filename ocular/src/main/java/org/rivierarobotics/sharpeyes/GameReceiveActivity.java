@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.ParcelUuid;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,8 +25,9 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
+
+import static org.rivierarobotics.sharpeyes.BTHelper.RFCOMM_ID;
+import static org.rivierarobotics.sharpeyes.Functional.forEach;
 
 public class GameReceiveActivity extends AppCompatActivity {
 
@@ -98,12 +98,15 @@ public class GameReceiveActivity extends AppCompatActivity {
 
         Log.i("ReceiveViaBT", "Starting post-BT filtering...");
         registerReceiver(receiveDeviceFindAction, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        registerReceiver(receiveDeviceFindAction, new IntentFilter(BluetoothDevice.ACTION_UUID));
         Thread t = new Thread(() -> {
-            adapter.getBondedDevices().forEach(this::addItemIfMatches);
+            forEach(adapter.getBondedDevices(), this::addItemIfMatches);
 
-            if (!adapter.startDiscovery()) {
-                Log.w("ReceiveViaBT", "Failed to start discovery process!");
-            }
+            adapter.cancelDiscovery();
+            // no discovery for now -- only paired devices
+//            if (!adapter.startDiscovery()) {
+//                Log.w("ReceiveViaBT", "Failed to start discovery process!");
+//            }
         }, getPackageName() + " - Bluetooth Client");
         t.start();
     }
@@ -127,13 +130,8 @@ public class GameReceiveActivity extends AppCompatActivity {
         }
     }
 
+
     private void addItemIfMatches(BluetoothDevice device) {
-        Log.d("ReceiveViaBT", "Checking device " + device.getName() + " for UUID");
-        if (Stream.of(device.getUuids())
-                .map(ParcelUuid::getUuid)
-                .noneMatch(Predicate.isEqual(BTHelper.RFCOMM_ID))) {
-            return;
-        }
         runOnUiThread(() -> {
             int[] itemId = {0};
             itemId[0] = adapter.addItem(new ReceiveDeviceAdapter.Item(device.getName(), view -> getGameFromDevice(device, itemId[0])));
@@ -145,7 +143,8 @@ public class GameReceiveActivity extends AppCompatActivity {
         threadPool.submit(() -> {
             BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
             setStatusAsync(item, ReceiveDeviceAdapter.Item.Status.FETCHING);
-            try (BluetoothSocket socket = device.createRfcommSocketToServiceRecord(BTHelper.RFCOMM_ID)) {
+            try (BluetoothSocket socket = device.createInsecureRfcommSocketToServiceRecord(RFCOMM_ID)) {
+                socket.connect();
                 DataInputStream stream = new DataInputStream(socket.getInputStream());
                 int command = stream.readInt();
                 if (command != BTHelper.COMMAND_RECEIVE_GAME) {

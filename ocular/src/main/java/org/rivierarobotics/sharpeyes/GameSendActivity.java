@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -104,14 +105,14 @@ public class GameSendActivity extends AppCompatActivity {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 
         Thread t = new Thread(() -> {
-            try (BluetoothServerSocket serverSocket = adapter.listenUsingRfcommWithServiceRecord("SharpEyes", RFCOMM_ID)) {
+            try (BluetoothServerSocket serverSocket = adapter.listenUsingInsecureRfcommWithServiceRecord("SharpEyes", RFCOMM_ID)) {
                 while (visible) {
                     BluetoothSocket socket = serverSocket.accept();
                     DataOutputStream stream = new DataOutputStream(socket.getOutputStream());
                     stream.writeInt(BTHelper.COMMAND_RECEIVE_GAME);
                     gameToWrite.writeDelimitedTo(stream);
                     runOnUiThread(() -> {
-                        ObjectAnimator toBlueAnimator = ObjectAnimator.ofArgb(wrapper, "backgroundColor", getColor(R.color.bluetooth));
+                        ObjectAnimator toBlueAnimator = ObjectAnimator.ofArgb(wrapper, "backgroundColor", ContextCompat.getColor(this, R.color.bluetooth));
                         toBlueAnimator.setDuration(250);
                         toBlueAnimator.setRepeatCount(ObjectAnimator.INFINITE);
                         toBlueAnimator.setRepeatMode(ObjectAnimator.REVERSE);

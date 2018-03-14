@@ -2,12 +2,12 @@ package org.rivierarobotics.sharpeyes.geom;
 
 import android.support.annotation.NonNull;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.AbstractIterator;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -194,6 +194,6 @@ public class AabbTree<E extends AabbCapable> extends AbstractCollection<E> imple
     public Optional<E> getIntersecting(int x, int y) {
         @SuppressWarnings("unchecked")
         E intersecting = (E) root.getIntersecting(x, y);
-        return Optional.ofNullable(intersecting);
+        return Optional.fromNullable(intersecting);
     }
 }

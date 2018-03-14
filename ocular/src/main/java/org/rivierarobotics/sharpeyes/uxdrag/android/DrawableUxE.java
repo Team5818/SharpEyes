@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
 import org.rivierarobotics.sharpeyes.uxdrag.BaseUxE;
-import org.rivierarobotics.sharpeyes.uxdrag.UxElement;
 
 public class DrawableUxE extends BaseUxE<DrawableUxE> implements CanvasUxE<DrawableUxE> {
 

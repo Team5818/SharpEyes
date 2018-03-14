@@ -3,7 +3,6 @@ package org.rivierarobotics.sharpeyes;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,16 +11,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.rivierarobotics.protos.Game;
 import org.rivierarobotics.protos.Regional;
-import org.rivierarobotics.sharpeyes.adapters.SelectorAdapter;
 import org.rivierarobotics.sharpeyes.adapters.InflatedGame;
-import org.rivierarobotics.sharpeyes.gamedb.GameDb;
+import org.rivierarobotics.sharpeyes.adapters.SelectorAdapter;
 import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
-import java.util.Comparator;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import static org.rivierarobotics.sharpeyes.Functional.comparing;
 
 public class RegionalSelectorActivity extends AppCompatActivity implements NameDialogFragment.NDFCallback {
 
@@ -41,7 +36,7 @@ public class RegionalSelectorActivity extends AppCompatActivity implements NameD
         regionalsView.setLayoutManager(new LinearLayoutManager(this));
         regionalsView.setAdapter(adapter = new SelectorAdapter<>(
                 this,
-                Comparator.comparing(Regional::getName),
+                comparing(Regional::getName),
                 db -> s -> db.getGame(s).getBase().getRegionalsMap().values(),
                 Regional::getName,
                 x -> null,

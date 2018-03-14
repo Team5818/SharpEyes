@@ -16,14 +16,16 @@ import org.rivierarobotics.protos.FieldDefinition;
 import org.rivierarobotics.protos.FieldValue;
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.DataSelector;
-import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 import org.rivierarobotics.sharpeyes.R;
 import org.rivierarobotics.sharpeyes.common.FieldDefHelper;
+import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.rivierarobotics.sharpeyes.Functional.forEach;
 
 
 public class MatchFieldAdapter extends RecyclerView.Adapter<MatchFieldAdapter.ViewHolder> {
@@ -146,7 +148,7 @@ public class MatchFieldAdapter extends RecyclerView.Adapter<MatchFieldAdapter.Vi
 
         Map<String, FieldValue> vals = new HashMap<>(db.getTeamMatch(selector).getValuesMap());
 
-        db.getGame(selector).getBase().getFieldDefsList().forEach(fd -> {
+        forEach(db.getGame(selector).getBase().getFieldDefsList(), fd -> {
             fieldDefs.add(fd);
             if (!vals.containsKey(fd.getName())) {
                 TeamMatch match = db.rebuildTeamMatch(selector, tm -> tm.putValues(fd.getName(), FieldDefHelper.defaultFieldValue(fd)));

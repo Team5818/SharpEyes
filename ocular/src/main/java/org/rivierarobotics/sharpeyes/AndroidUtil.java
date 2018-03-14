@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.view.View;
 
-import java.util.function.Consumer;
-
 
 public class AndroidUtil {
 

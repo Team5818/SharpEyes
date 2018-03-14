@@ -11,18 +11,18 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.common.base.Function;
+
+import org.rivierarobotics.sharpeyes.BiFunction;
 import org.rivierarobotics.sharpeyes.DataSelector;
-import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 import org.rivierarobotics.sharpeyes.R;
+import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 
 public class SelectorAdapter<T> extends RecyclerView.Adapter<SelectorAdapter.ViewHolder> {
@@ -109,7 +109,7 @@ public class SelectorAdapter<T> extends RecyclerView.Adapter<SelectorAdapter.Vie
     public void reloadData() {
         dataset.clear();
         dataset.addAll(selectData.apply(db).apply(selector));
-        dataset.sort(comparator);
+        Collections.sort(dataset, comparator);
         notifyDataSetChanged();
     }
 

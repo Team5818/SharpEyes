@@ -3,15 +3,13 @@ package org.rivierarobotics.sharpeyes.adapters;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
-
-import com.google.protobuf.ProtocolStringList;
 
 import java.util.List;
 
 class ChoiceAdapter extends BaseAdapter {
     private final List<String> choices;
+
     public ChoiceAdapter(List<String> choices) {
         this.choices = choices;
     }

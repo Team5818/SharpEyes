@@ -1,7 +1,8 @@
 package org.rivierarobotics.sharpeyes.geom;
 
+import com.google.common.base.Optional;
+
 import java.util.Collection;
-import java.util.Optional;
 
 public interface AabbCollection<E extends AabbCapable> extends Collection<E> {
 

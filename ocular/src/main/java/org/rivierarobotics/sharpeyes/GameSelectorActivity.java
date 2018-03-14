@@ -19,8 +19,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import org.rivierarobotics.protos.Game;
-import org.rivierarobotics.sharpeyes.adapters.SelectorAdapter;
 import org.rivierarobotics.sharpeyes.adapters.InflatedGame;
+import org.rivierarobotics.sharpeyes.adapters.SelectorAdapter;
 import org.rivierarobotics.sharpeyes.gamedb.GameDb;
 import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
@@ -28,10 +28,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Comparator;
 
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static org.rivierarobotics.sharpeyes.Functional.comparing;
+import static org.rivierarobotics.sharpeyes.Functional.forEach;
 
 public class GameSelectorActivity extends AppCompatActivity {
 
@@ -49,7 +49,7 @@ public class GameSelectorActivity extends AppCompatActivity {
         gamesView.setLayoutManager(new LinearLayoutManager(this));
         gamesView.setAdapter(adapter = new SelectorAdapter<>(
                 this,
-                Comparator.comparing(InflatedGame::getName),
+                comparing(InflatedGame::getName),
                 db -> s -> db.getGames().values(),
                 InflatedGame::getName,
                 InflatedGame::getIcon,
@@ -91,22 +91,20 @@ public class GameSelectorActivity extends AppCompatActivity {
 //        db.rebuildGame(selector.selectGame("STRONGHOLD"), g -> {
 //        });
 
-        sharpFiles.getSavedGameFiles().stream()
-                .map(this::loadGame)
-                .forEach(g ->
-                        db.getGames().put(g.getName(), InflatedGame.inflate(g))
-                );
+        for (File file : sharpFiles.getSavedGameFiles()) {
+            Game g = loadGame(file);
+            db.getGames().put(g.getName(), InflatedGame.inflate(g));
+        }
 
         Thread task = new Thread(() -> {
-            GameDb.getInstance().getDao().getAll()
-                    .forEach(g ->
-                            db.rebuildGame(selector.selectGame(g.getName()), b -> {
-                                if (g.getGame() != null) {
-                                    return g.getGame().toBuilder();
-                                }
-                                return b;
-                            })
-                    );
+            forEach(GameDb.getInstance().getDao().getAll(), g ->
+                    db.rebuildGame(selector.selectGame(g.getName()), b -> {
+                        if (g.getGame() != null) {
+                            return g.getGame().toBuilder();
+                        }
+                        return b;
+                    })
+            );
             runOnUiThread(adapter::onReloadRequest);
         }, "db-task");
         task.start();
@@ -204,7 +202,7 @@ public class GameSelectorActivity extends AppCompatActivity {
         try (FileInputStream in = new FileInputStream(source)) {
             return Game.parseFrom(in);
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new RuntimeException(e);
         }
     }
 

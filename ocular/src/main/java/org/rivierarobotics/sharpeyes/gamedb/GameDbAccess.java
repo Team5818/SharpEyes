@@ -10,20 +10,18 @@ import org.rivierarobotics.protos.Regional;
 import org.rivierarobotics.protos.TeamMatch;
 import org.rivierarobotics.sharpeyes.DataSelector;
 import org.rivierarobotics.sharpeyes.SharpFiles;
+import org.rivierarobotics.sharpeyes.UnaryOperator;
 import org.rivierarobotics.sharpeyes.adapters.InflatedGame;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -59,7 +57,14 @@ public class GameDbAccess {
     }
 
     public InflatedGame getGame(DataSelector selector) {
-        return games.computeIfAbsent(selector.gameId(), gid -> InflatedGame.inflate(Game.newBuilder().setName(gid).build()));
+        synchronized (games) {
+            String k = selector.gameId();
+            InflatedGame v = games.get(k);
+            if (v == null) {
+                games.put(k, v = InflatedGame.inflate(Game.newBuilder().setName(k).build()));
+            }
+            return v;
+        }
     }
 
     public InflatedGame rebuildGame(DataSelector selector, UnaryOperator<Game.Builder> config) {
@@ -79,7 +84,6 @@ public class GameDbAccess {
             g.getBase().writeTo(stream);
         } catch (IOException e) {
             Log.e("GameDbAccess", "Error saving game", e);
-            return;
         }
     }
 

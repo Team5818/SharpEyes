@@ -1,9 +1,9 @@
 package org.rivierarobotics.sharpeyes.uxdrag;
 
+import com.google.common.base.Optional;
+
 import org.rivierarobotics.sharpeyes.geom.AabbCollection;
 import org.rivierarobotics.sharpeyes.geom.AabbTree;
-
-import java.util.Optional;
 
 public class UxDragImpl<E extends UxElement<E>> implements UxDrag<E> {
 

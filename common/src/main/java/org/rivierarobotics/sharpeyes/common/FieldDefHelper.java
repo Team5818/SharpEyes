@@ -24,13 +24,13 @@
  */
 package org.rivierarobotics.sharpeyes.common;
 
+import org.rivierarobotics.protos.FieldDefinition;
+import org.rivierarobotics.protos.FieldValue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.rivierarobotics.protos.FieldDefinition;
-import org.rivierarobotics.protos.FieldValue;
 
 public class FieldDefHelper {
 

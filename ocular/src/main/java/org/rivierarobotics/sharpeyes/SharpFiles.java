@@ -1,21 +1,14 @@
 package org.rivierarobotics.sharpeyes;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.FluentIterable;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 
 public class SharpFiles {
 
@@ -63,10 +56,10 @@ public class SharpFiles {
     }
 
     public List<File> getSavedGameFiles() {
-        return ImmutableList.copyOf(root.listFiles()).stream()
-                .map(gameDir -> new File(gameDir, GAME_DEF_NAME))
+        return FluentIterable.from(root.listFiles())
+                .transform(gameDir -> new File(gameDir, GAME_DEF_NAME))
                 .filter(File::exists)
-                .collect(toImmutableList());
+                .toList();
     }
 
     public File getSavedGameFile(String name) {

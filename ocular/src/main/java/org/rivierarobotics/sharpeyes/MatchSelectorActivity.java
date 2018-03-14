@@ -13,7 +13,7 @@ import org.rivierarobotics.protos.Match;
 import org.rivierarobotics.sharpeyes.adapters.SelectorAdapter;
 import org.rivierarobotics.sharpeyes.gamedb.GameDbAccess;
 
-import java.util.Comparator;
+import static org.rivierarobotics.sharpeyes.Functional.comparingInt;
 
 public class MatchSelectorActivity extends AppCompatActivity implements NameDialogFragment.NDFCallback {
 
@@ -33,7 +33,7 @@ public class MatchSelectorActivity extends AppCompatActivity implements NameDial
         matchesView.setLayoutManager(new LinearLayoutManager(this));
         matchesView.setAdapter(adapter = new SelectorAdapter<>(
                 this,
-                Comparator.comparingInt(Match::getMatchNumber),
+                comparingInt(Match::getMatchNumber),
                 db -> s -> db.getRegional(s).getMatchesMap().values(),
                 m -> getString(R.string.match_x, m.getMatchNumber()),
                 m -> null,
